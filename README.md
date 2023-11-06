@@ -4,9 +4,32 @@
 - djangorestframework-jwt 
 - django-cors-headers
 
+# 브랜치 전략
+### main
+
+에러 발생시 hotfix로 분기
+
+### hotfix
+
+오류 해결시 main, devlop병합
+
+### release
+
+테스트 후 문제가 없으면 main, develop로 병합
+
+### develop
+
+기능개발시 feature/<기능> 브랜치로 분기
+목표지점까지 개발 완료시 release 브랜치로 분기
+
+### feature/
+
+기능 별 브랜치 생성(ex. feature/login)
+기능 개발 완료 시 develop에 병합
+
 # 커밋 컨벤션
 
-## `<type>(<scope>): <message>`
+### `<type>(<scope>): <message>`
 
 ### type(필수)
 - feat: 새로운 기능 추가
@@ -37,3 +60,7 @@
 - fix(validation): 유저 로그인 데이터 검증
 - docs(readme): 그라운드룰 추가
 - test(articles): 작성글 조회 테스트
+
+# git hooks
+### pre-commit
+- black
