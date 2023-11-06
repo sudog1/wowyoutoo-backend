@@ -21,6 +21,8 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 
+# BASE_DIR은 manage.py가 위치한 디렉토리입니다.
+# .env파일은 BASE_DIR안에 위치해야 합니다.
 environ.Env.read_env(BASE_DIR / ".env")
 
 DEBUG = env("DEBUG")
