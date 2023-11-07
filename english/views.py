@@ -1,5 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.generics import get_object_or_404
+from english.models import ReadingPassage
+from english.serializers import PassageListSerializer, PassageDetailSerializer
 
 
 # Create your views here.
@@ -10,7 +14,16 @@ class PassageCreateView(APIView):
 
 class PassageView(APIView):
     def get(self, requset, passage_id=None):
-        pass
+        if passage_id:
+            #상세보기
+            passage = get_object_or_404(ReadingPassage, pk=passage_id)
+            serializer = PassageDetailSerializer(passage)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            #전체보기
+            passages = ReadingPassage.objects.all()
+            serializer = PassageListSerializer(passages, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         pass
