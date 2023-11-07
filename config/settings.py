@@ -25,7 +25,7 @@ env = environ.Env(
 environ.Env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env('SECRET_KEY')
-
+DEBUG=env("DEBUG")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_auth.registration',
     'dj_rest_auth',
+    'drf_yasg',
 
     # user authentication basic module
     'django.contrib.sites',
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.account',
     'accounts',
+    'english',
 ]
 
 SITE_ID = 1
@@ -157,7 +159,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -205,7 +207,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-
 
 MEDIAFILES_DIRS = [
     BASE_DIR / "media",

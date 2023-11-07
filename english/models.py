@@ -26,10 +26,10 @@ class Select(models.Model):
 
 
 class Difficult(models.Model):
-    step = models.IntegerField(validators=MinValueValidator(1))
+    step = models.IntegerField(validators=[MinValueValidator(1)])
 
 
 class Word(models.Model):
     content = models.CharField(max_length=30)
     meaning = models.CharField(max_length=30)
-    user = models.ForeignKey(AUTH_USER_MODEL, related_name="words")
+    user = models.ManyToManyField(AUTH_USER_MODEL, related_name="words")

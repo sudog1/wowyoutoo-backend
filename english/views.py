@@ -10,7 +10,7 @@ class PassageCreateView(APIView):
 
 class PassageView(APIView):
     def get(self, requset, passage_id=None):
-        pass
+        return Response("yasgtest")
 
     def post(self, request):
         pass
