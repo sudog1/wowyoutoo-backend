@@ -44,23 +44,13 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class LoginSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        user = get_object_or_404(User, email=attrs[self.username_field])
-
-        if check_password(attrs['password'], user.password) == False:
-            raise NotFound("사용자를 찾을 수 없습니다. 로그인 정보를 확인하세요.")  # 404 Not Found
-        # elif user.is_active == False:
-        #     raise AuthenticationFailed("이메일 인증이 필요합니다.")  # 401 Unauthorized
-        else:
-            # 기본 동작을 실행하고 반환된 데이터를 저장합니다.
-            data = super().validate(attrs)
-            return data
-
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
 
-        token['email'] = user.email
-        token['username'] = user.username
+        # Add custom claims
+        token["email"] = user.email
+        # ...
+
         return token
