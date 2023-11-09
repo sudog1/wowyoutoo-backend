@@ -32,4 +32,4 @@ class Difficult(models.Model):
 class Word(models.Model):
     content = models.CharField(max_length=30)
     meaning = models.CharField(max_length=30)
-    user = models.ForeignKey(AUTH_USER_MODEL, related_name="words")
+    user = models.ManyToManyField(AUTH_USER_MODEL, related_name="words")
