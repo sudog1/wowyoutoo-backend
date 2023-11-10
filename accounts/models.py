@@ -54,6 +54,7 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField("관리자 여부", default=False)
     updated_at = models.DateField("수정일", auto_now=True)
     verified = models.BooleanField(default=False)
+    # agree_terms = models.BooleanField(verbose_name="서비스 이용약관 동의")
 
     objects = UserManager()
 
@@ -72,3 +73,12 @@ class User(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
+
+
+class English_Level(models.Model):
+    LEVEL_CHOICES = [
+        ('초급', 'Basic'),
+        ('중급', 'Intermediate'),
+        ('고급', 'Advance'),
+    ]
+    level = models.CharField(max_length=2, choices=LEVEL_CHOICES)

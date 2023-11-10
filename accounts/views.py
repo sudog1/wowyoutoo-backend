@@ -14,27 +14,18 @@ import os
 from rest_framework import status
 from .models import User
 from allauth.socialaccount.models import SocialAccount
+from allauth.socialaccount.providers.kakao import views as kakao_view
+from allauth.socialaccount.providers.github import views as github_view
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from allauth.socialaccount.providers.google import views as google_view
 from json.decoder import JSONDecodeError
 import json
 
 
 state = os.environ.get("STATE")
-BASE_URL = 'http://localhost:8000/'
-GOOGLE_CALLBACK_URI = BASE_URL + 'accounts/google/callback/'
-
-
-class SignupView(APIView):
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-
-            return Response({"message": "회원가입 성공!"}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+BASE_URL = 'http://127.0.0.1:8000/'
+KAKAO_CALLBACK_URI = BASE_URL + 'accounts/kakao/callback/'
+GITHUB_CALLBACK_URI = BASE_URL + 'accounts/github/callback/'
 
 
 class ConfirmEmailView(APIView):
@@ -65,7 +56,7 @@ class ConfirmEmailView(APIView):
         return qs
 
 
-class AccountCreateView(APIView):
+class SignupView(APIView):
     def post(self, request):
         # 사용자 정보를 받아서 회원을 생성합니다.
         serializer = UserSerializer(data=request.data)
@@ -84,121 +75,94 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 
-# @permission_classes((permissions.AllowAny,))
-# class LoginView(TokenObtainPairView):
-#     serializer_class = LoginSerializer
-
-
 class Token_Test(APIView):
     def get(self, request):
         print(request.user)
         return Response("get요청")
 
 
-# google_login 실행 후 로그인 성공 시, Callback 함수로 구글한테 Code값 전달받음
-# 받은 Code로 Google에 Access Token 요청
-# Access Token으로 Email 값을 Google에게 요청
-# 전달받은 Email, Access Token, Code를 바탕으로 로그인 진행
-
-# 코드 요청
-def google_login(request):
-    scope = "https://www.googleapis.com/auth/userinfo.email"
-    client_id = os.environ.get("SOCIAL_AUTH_GOOGLE_CLIENT_ID")
-    return redirect(f"https://accounts.google.com/o/oauth2/v2/auth?client_id={client_id}&response_type=code&redirect_uri={GOOGLE_CALLBACK_URI}&scope={scope}")
-
-# 토큰 요청
+"""Kakao 로그인 호출:
+Kakao 로그인을 구현하기 위해 필요한 REST API 키를 얻고
+사용자를 Kakao 인증 화면으로 리디렉션하는 URL을 생성"""
 
 
-def google_callback(request):
-    client_id = os.environ.get("SOCIAL_AUTH_GOOGLE_CLIENT_ID")
-    # 구글에서 발급 받은 클라이언트 ID .env에서 가져오기
-    client_secret = os.environ.get("SOCIAL_AUTH_GOOGLE_SECRET")
-    # secret도 .env에서 가져오기
-    code = request.GET.get('code')
-    # 인증 코드 가져오기
+def kakao_login(request):
+    rest_api_key = os.environ.get('KAKAO_REST_API_KEY')
+    return redirect(
+        f"https://kauth.kakao.com/oauth/authorize?client_id={rest_api_key}&redirect_uri={KAKAO_CALLBACK_URI}&response_type=code"
+    )
 
-    # 받은 코드를 구글에 access token 요청
-    token_req = requests.post(
-        f"https://oauth2.googleapis.com/token?client_id={client_id}&client_secret={client_secret}&code={code}&grant_type=authorization_code&redirect_uri={GOOGLE_CALLBACK_URI}&state={state}")
 
-    # json으로 변환시키고 에러 부분 파싱
+"""Kakao 콜백 처리:
+Kakao에서 제공하는 콜백 URL에서는 인가 코드를 받아오고
+받아온 인가 코드를 사용하여 Kakao로부터 액세스 토큰을 요청."""
+
+
+def kakao_callback(request):
+
+    rest_api_key = os.environ.get("KAKAO_REST_API_KEY")
+    code = request.GET.get("code")
+    redirect_uri = KAKAO_CALLBACK_URI
+    token_req = requests.get(
+        f"https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id={rest_api_key}&redirect_uri={redirect_uri}&code={code}")
     token_req_json = token_req.json()
     error = token_req_json.get("error")
 
     # 에러 발생 시 종료
     if error is not None:
         raise JSONDecodeError(error)
-
     # access_token 가져오기
     access_token = token_req_json.get('access_token')
 
-    # 가져온 access_token으로 이메일값을 구글에 요청
-    email_req = requests.get(
-        f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}")
-    email_req_status = email_req.status_code
+    # 카카오톡 프로필, 배경 이미지 url, 이메일 가져올수있음
+    profile_request = requests.get(
+        "https://kapi.kakao.com/v2/user/me", headers={"Authorization": f"Bearer {access_token}"})
+    profile_json = profile_request.json()
+    error = profile_json.get("error")
+    if error is not None:
+        raise JSONDecodeError(error)
+    kakao_account = profile_json.get('kakao_account')
+    email = kakao_account.get('email')
+    nickname = kakao_account.get('nickname')
 
-    # 에러 발생 시 400 에러 반환
-    if email_req_status != 200:
-        return JsonResponse({'err_msg': 'failed to get email'}, status=status.HTTP_400_BAD_REQUEST)
+    """사용자 처리 및 응답:
+    Kakao로부터 받아온 사용자 프로필 정보를 로컬 데이터베이스에서 사용자를 확인하고 처리
+    처리 결과에 따라 로그인 또는 회원가입을 수행하고, 결과를 JSON 형식으로 반환"""
 
-    # 성공 시 이메일 가져오기
-    email_req_json = email_req.json()
-    email = email_req_json.get('email')
-
-    # 전달받은 이메일, access_token, code를 바탕으로 회원가입/로그인
     try:
-        # 전달받은 이메일로 등록된 유저가 있는지 탐색
         user = User.objects.get(email=email)
-
-        # socialaccount 테이블에서 해당 이메일의 유저가 있는지 확인
+        # 기존에 가입된 유저의 Provider가 kakao가 아니면 에러 발생, 맞으면 로그인
+        # 다른 SNS로 가입된 유저
         social_user = SocialAccount.objects.get(user=user)
-
-        # 있는데 구글계정이 아니어도 에러
-        if social_user.provider != 'google':
+        if social_user is None:
+            return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
+        if social_user.provider != 'kakao':
             return JsonResponse({'err_msg': 'no matching social type'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 이미 Google로 제대로 가입된 유저 => 로그인 & 해당 유저의 jwt 발급
         data = {'access_token': access_token, 'code': code}
         accept = requests.post(
-            f"{BASE_URL}accounts/google/login/finish/", data=data)
+            f"{BASE_URL}accounts/kakao/login/finish/", data=data)
         accept_status = accept.status_code
-
-        return JsonResponse({"access_token": access_token, "email": email})
-        # 중간에 문제가 생기면 에러
         if accept_status != 200:
-            return JsonResponse({'err_msg': '로그인 문제가 발생했습니다'}, status=accept_status)
-
+            return JsonResponse({'err_msg': 'failed to signin'}, status=accept_status)
         accept_json = accept.json()
         accept_json.pop('user', None)
         return JsonResponse(accept_json)
-
     except User.DoesNotExist:
-        # 전달받은 이메일로 기존에 가입된 유저가 아예 없으면 => 새로 회원가입 & 해당 유저의 jwt 발급
-        # data = {'access_token': access_token, 'code': code}
-        response_data = {'access_token': access_token, 'code': code}
+        # 기존에 가입된 유저가 없으면 새로 가입
+        data = {'access_token': access_token, 'code': code}
         accept = requests.post(
-            f"{BASE_URL}accounts/google/login/finish/", response_data=response_data)
+            f"{BASE_URL}accounts/kakao/login/finish/", data=data)
         accept_status = accept.status_code
-        print(accept)
-        print(accept_status)
-
-        # 뭔가 중간에 문제가 생기면 에러
         if accept_status != 200:
             return JsonResponse({'err_msg': 'failed to signup'}, status=accept_status)
-
+        # user의 pk, email, first name, last name과 Access Token, Refresh token 가져옴
         accept_json = accept.json()
         accept_json.pop('user', None)
         return JsonResponse(accept_json)
 
-    except SocialAccount.DoesNotExist:
-        # User는 있는데 SocialAccount가 없을 때
-        return JsonResponse({'err_msg': '일반 회원으로 가입된 이메일입니다'}, status=status.HTTP_400_BAD_REQUEST)
 
-
-class GoogleLogin(SocialLoginView):
-    adapter_class = google_view.GoogleOAuth2Adapter
-    # Google OAuth2 인증을 처리하기 위해 google_view.GoogleOAuth2Adapter 클래스가 사용
-    callback_url = GOOGLE_CALLBACK_URI
-    # 구글 로그인 후에 사용자가 리디렉션되는 콜백 URL
+class KakaoLogin(SocialLoginView):
+    adapter_class = kakao_view.KakaoOAuth2Adapter
     client_class = OAuth2Client
-    # OAuth2 클라이언트는 OAuth2 프로토콜을 사용하여 소셜 로그인 서비스와 통신하는 데 사용
+    callback_url = KAKAO_CALLBACK_URI
