@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     # 대화 생성
-    path("dialogue/", views.DialogueView.as_view(), name="dialogue"),
+    # path("dialogue/", views.DialogueView.as_view(), name="dialogue"),
     # 지문 생성
     path("passage/create/", views.PassageCreateView.as_view(), name="passage_create"),
     # 내 지문리스트에 저장,내 지문리스트 보기
