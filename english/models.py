@@ -22,11 +22,11 @@ class Select(models.Model):
     user = models.ForeignKey(
         AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="selects"
     )
-    passage = models.OneToOneField(ReadingPassage, on_delete=models.CASCADE)
+    passage = models.ForeignKey(ReadingPassage, on_delete=models.CASCADE,related_name='selects')
 
 
 class Difficult(models.Model):
-    step = models.IntegerField(validators=MinValueValidator(1))
+    step = models.IntegerField(validators=[MinValueValidator(1)])
 
 
 class Word(models.Model):

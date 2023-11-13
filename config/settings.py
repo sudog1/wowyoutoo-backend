@@ -25,7 +25,7 @@ env = environ.Env(
 environ.Env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env('SECRET_KEY')
-
+DEBUG=env("DEBUG")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'accounts',
 
     #app
-    'english'
+    'english',
     'service'
 ]
 
