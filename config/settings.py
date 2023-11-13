@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
-    "rest_auth.registration",
+    # "rest_auth.registration",
     "dj_rest_auth",
     # user authentication basic module
     "django.contrib.sites",
