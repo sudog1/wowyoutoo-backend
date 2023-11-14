@@ -6,6 +6,7 @@ from config.settings import AUTH_USER_MODEL
 from .serializers import AnnoucementListSerializer,AnnoncementSerializer,QnaListSerializer,QnaSerializer,QnaResponseSerializer
 from .models import Announcement,Qna,QnaResponse
 from .permissions import ReadOnlyPermission
+from .pagenation import PostPageNumberPagination
 # Create your views here.
 class AnnouncementView(APIView):
     permission_classes=[ReadOnlyPermission]
@@ -40,10 +41,16 @@ class AnnouncementView(APIView):
     
 class QnaView(APIView):
     permission_classes=[permissions.IsAuthenticatedOrReadOnly]
-    def get(self,request,qna_id=None):
+    pagination_class = PostPageNumberPagination
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+    def get(self,request,qna_id=None,format=None):
         if qna_id==None:
             qnas=Qna.objects.select_related("author").all().order_by("-created_at")
-            serializer=QnaListSerializer(qnas,many=True)
+            pagenator = self.pagination_class()
+            page = pagenator.paginate_queryset(qnas, request)
+            serializer=pagenator.get_paginated_response(QnaListSerializer(page,many=True).data)
             return Response(serializer.data,status=status.HTTP_200_OK)
         else:
             qna=get_object_or_404(Qna.objects.select_related("author"),pk=qna_id)

@@ -66,7 +66,6 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         # ...other authentication classes...
     ),
-    # ...
 }
 
 MIDDLEWARE = [
@@ -123,7 +122,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-    }
+    },
 }
 
 
@@ -216,3 +215,5 @@ MEDIAFILES_DIRS = [
 ]
 
 MEDIA_URL = "/media/"
+
+
