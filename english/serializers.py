@@ -3,9 +3,11 @@ from english.models import Word
 
 
 class WordSerializer(serializers.ModelSerializer):
+    word = serializers.CharField(source='content')
+
     class Meta:
         model = Word
-        fields = ("content", "meaning",)
+        fields = ("word", "meaning",)
 
 
 class WordQuizesSerializer(serializers.Serializer):
