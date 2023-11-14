@@ -22,14 +22,18 @@ env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False)
 )
+
+# BASE_DIR은 manage.py가 위치한 디렉토리입니다.
+# .env파일은 BASE_DIR안에 위치해야 합니다.
 environ.Env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG=env("DEBUG")
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -41,11 +45,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'rest_framework',
-    'rest_framework.authtoken',
-    'rest_auth.registration',
-    'dj_rest_auth',
-
+    "rest_framework",
+    "rest_framework.authtoken",
+    # "rest_auth.registration",
+    "dj_rest_auth",
     # user authentication basic module
     'django.contrib.sites',
     'allauth',
@@ -78,7 +81,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-
 ]
 
 REST_AUTH = {
@@ -157,11 +159,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = "static/"
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -176,7 +173,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": False,
     "ALGORITHM": "HS256",
-    "SIGNING_KEY": env('SECRET_KEY'),
+    "SIGNING_KEY": env("SECRET_KEY"),
     "VERIFYING_KEY": "",
     "AUDIENCE": None,
     "ISSUER": None,
@@ -217,3 +214,4 @@ MEDIAFILES_DIRS = [
 MEDIA_URL = "/media/"
 
 
+STATIC_URL = "/static/"
