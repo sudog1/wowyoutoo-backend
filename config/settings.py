@@ -16,9 +16,8 @@ env = environ.Env(
 # .env파일은 BASE_DIR안에 위치해야 합니다.
 environ.Env.read_env(BASE_DIR / ".env")
 
-DEBUG = env("DEBUG")
-
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = env('SECRET_KEY')
+DEBUG=env("DEBUG")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -48,7 +47,8 @@ INSTALLED_APPS = [
     "accounts",
     'allauth.socialaccount.providers.kakao',
     'allauth.socialaccount.providers.github',
-
+    'english',
+    'service'
 ]
 
 SITE_ID = 1
@@ -69,7 +69,6 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         # ...other authentication classes...
     ),
-    # ...
 }
 
 MIDDLEWARE = [
@@ -138,7 +137,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-    }
+    },
 }
 
 
