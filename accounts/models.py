@@ -1,12 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, AbstractUser
 
 
 class UserManager(BaseUserManager):
 
     """ 사용자 모델을 생성하고 관리하는 클래스입니다. """
 
-    def create_user(self, email, password, username):
+    def create_user(self, email, password, nickname):
         """ 일반 사용자를 생성하는 메서드입니다. """
         if not email:
             raise ValueError('유효하지 않은 이메일 형식입니다.')
@@ -14,7 +14,7 @@ class UserManager(BaseUserManager):
         user = self.model(
             email=self.normalize_email(email),
             password=password,
-            username=username,
+            nickname=nickname,
         )
 
         user.set_password(password)
@@ -29,7 +29,7 @@ class UserManager(BaseUserManager):
         user = self.create_user(
             email,
             password=password,
-            username=username,
+            nickname=nickname,
         )
 
         user.is_admin = True
@@ -39,8 +39,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
-
-    username = models.CharField("아이디", max_length=30, unique=True)
+    username = None
+    nickname = models.CharField("닉네임", max_length=30)
     password = models.CharField("비밀번호", max_length=255)
     email = models.EmailField(unique=True)
     profile_img = models.ImageField(
@@ -54,15 +54,15 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField("관리자 여부", default=False)
     updated_at = models.DateField("수정일", auto_now=True)
     verified = models.BooleanField(default=False)
-    agree_terms = models.BooleanField("서비스 이용약관 동의")
+    agree_terms = models.BooleanField("서비스 이용약관 동의", default=False, null=True)
 
     objects = UserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username", "password"]
+    REQUIRED_FIELDS = ["password"]
 
     def __str__(self):
-        return self.username
+        return self.email
 
     def has_perm(self, perm, obj=None):
         return True
@@ -75,10 +75,10 @@ class User(AbstractBaseUser):
         return self.is_admin
 
 
-class English_Level(models.Model):
-    LEVEL_CHOICES = [
-        ('BASIC', 'Basic'),
-        ('INTERMEDIATE', 'Intermediate'),
-        ('ADVANCE', 'Advance'),
-    ]
-    level = models.CharField(max_length=2, choices=LEVEL_CHOICES)
+# class English_Level(models.Model):
+#     LEVEL_CHOICES = [
+#         ('BASIC', 'Basic'),
+#         ('INTERMEDIATE', 'Intermediate'),
+#         ('ADVANCE', 'Advance'),
+#     ]
+#     level = models.CharField(max_length=2, choices=LEVEL_CHOICES)

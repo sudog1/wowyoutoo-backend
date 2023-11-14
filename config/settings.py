@@ -54,10 +54,12 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 REST_USE_JWT = True
-ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'  # username 필드 사용 o
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True            # email 필드 사용 o
-ACCOUNT_USERNAME_REQUIRED = True        # username 필드 사용 o
+ACCOUNT_USERNAME_REQUIRED = False        # username 필드 사용 x
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_UNIQUE_EMAIL = True
+
 
 # ACCOUNT_EMAIL_VERIFICATION = 'none'  # 회원가입 과정에서 이메일 인증 사용 X
 
@@ -81,6 +83,10 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+REST_AUTH_REGISTER_SERIALIZERS = {
+    "REGISTER_SERIALIZER": "accounts.serializers.CustomRegisterSerializer",
+}
 
 REST_AUTH = {
     "USE_JWT": True,
@@ -227,6 +233,7 @@ MEDIAFILES_DIRS = [
 MEDIA_URL = "/media/"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"  # 메일 호스트 서버
 EMAIL_PORT = "587"  # gmail과 통신하는 포트
 EMAIL_HOST_USER = "danielhochan1@gmail.com"  # 발신할 이메일

@@ -4,12 +4,13 @@ from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from accounts.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
-from accounts.serializers import UserSerializer, CustomTokenObtainPairSerializer
+from accounts.serializers import CustomTokenObtainPairSerializer, CustomRegisterSerializer
 from rest_framework.permissions import AllowAny
 from django.shortcuts import redirect
 from json import JSONDecodeError
 from django.http import JsonResponse
 import requests
+from rest_framework import status, permissions
 import os
 from rest_framework import status
 from .models import User
@@ -20,6 +21,7 @@ from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from json.decoder import JSONDecodeError
 import json
+from dj_rest_auth.registration.views import RegisterView
 
 
 state = os.environ.get("STATE")
@@ -28,16 +30,33 @@ KAKAO_CALLBACK_URI = BASE_URL + 'accounts/kakao/callback/'
 GITHUB_CALLBACK_URI = BASE_URL + 'accounts/github/callback/'
 
 
+# dj-rest-auth 이메일 인증 로직
+"""
+1. 이메일 전송
+    제공된 dj_rest_auth.registration.urls로 회원가입시 자동으로 이메일 전송
+2. 이메일 확인
+    ConfirmEmailView를 활용하여 이메일 확인 로직이 진행
+    이메일 확인 키를 추출하고, 해당 키를 사용하여 이메일 확인 객체를 가져옴
+3. 이메일 확인 처리
+    ConfirmEmailView에서 가져온 이메일 확인 객체의 confirm 메서드를 호출하여 이메일을 확인
+    확인에 성공하면, 사용자는 인증된 상태로 간주하고 인증에 실패하면 지정된 경로로 이동시킴
+4. 권한 설정
+    Allowany로 모든 사용자가 이뷰에 접근할수있게함 
+"""
+
+
 class ConfirmEmailView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, *args, **kwargs):
+        # 사용자가 이메일 확인 링크로 GET 요청을 보낼 때 실행되는 메서드
         self.object = confirmation = self.get_object()
         confirmation.confirm(self.request)
-        # A React Router Route will handle the failure scenario
         return HttpResponseRedirect("accounts/")  # 인증실패  # 인증성공
+        # 이메일 확인 객체를 가져오고, 해당 객체의 confirm 메서드를 호출하여 이메일을 확인
 
     def get_object(self, queryset=None):
+        # URL에서 추출한 이메일 확인 키를 사용하여 EmailConfirmationHMAC.from_key를 호출하여 이메일 확인 객체를 가져옴
         key = self.kwargs["key"]
         email_confirmation = EmailConfirmationHMAC.from_key(key)
         if not email_confirmation:
@@ -46,27 +65,32 @@ class ConfirmEmailView(APIView):
             try:
                 email_confirmation = queryset.get(key=key.lower())
             except EmailConfirmation.DoesNotExist:
-                # A React Router Route will handle the failure scenario
                 return HttpResponseRedirect("accounts/")  # 인증실패 # 인증실패
         return email_confirmation
 
     def get_queryset(self):
         qs = EmailConfirmation.objects.all_valid()
+        # 모든 유효한 이메일 확인 객체를 반환하는 쿼리셋을 정의
         qs = qs.select_related("email_address__user")
+        # 연결된 이메일 주소 및 사용자 정보를 함께 가져움
         return qs
 
 
-class SignupView(APIView):
-    def post(self, request):
-        # 사용자 정보를 받아서 회원을 생성합니다.
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message ": "가입완료!"}, status=status.HTTP_201_CREATED)
-        else:
-            return Response(
-                {"massage": f"${serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST
-            )
+# class SignupView(APIView):
+#     def post(self, request):
+#         # 사용자 정보를 받아서 회원을 생성합니다.
+#         serializer = UserSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({"message ": "가입완료!"}, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response(
+#                 {"massage": f"${serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST
+#             )
+
+class CustomRegisterView(RegisterView):
+    serializer_class = CustomRegisterSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -93,18 +117,6 @@ def kakao_login(request):
     )
 
 
-def kakaoLogout(request):
-    token = request.session['access_token']
-    url = 'https://kapi.kakao.com/v1/user/logout'
-    header = {
-        'Authorization': f'bearer {_token}'
-    }
-    res = requests.post(_url, headers=_header)
-    result = _res.json()
-    if _result.get('id'):
-        del request.session['access_token']
-
-
 """Kakao 콜백 처리:
 Kakao에서 제공하는 콜백 URL에서는 인가 코드를 받아오고
 받아온 인가 코드를 사용하여 Kakao로부터 액세스 토큰을 요청."""
@@ -115,6 +127,7 @@ def kakao_callback(request):
     rest_api_key = os.environ.get("KAKAO_REST_API_KEY")
     code = request.GET.get("code")
     redirect_uri = KAKAO_CALLBACK_URI
+
     token_req = requests.get(
         f"https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id={rest_api_key}&redirect_uri={redirect_uri}&code={code}")
     token_req_json = token_req.json()
@@ -123,6 +136,7 @@ def kakao_callback(request):
     # 에러 발생 시 종료
     if error is not None:
         raise JSONDecodeError(error)
+
     # access_token 가져오기
     access_token = token_req_json.get('access_token')
 
@@ -131,6 +145,7 @@ def kakao_callback(request):
         "https://kapi.kakao.com/v2/user/me", headers={"Authorization": f"Bearer {access_token}"})
     profile_json = profile_request.json()
     error = profile_json.get("error")
+
     if error is not None:
         raise JSONDecodeError(error)
     kakao_account = profile_json.get('kakao_account')
@@ -168,7 +183,6 @@ def kakao_callback(request):
         accept_status = accept.status_code
         if accept_status != 200:
             return JsonResponse({'err_msg': '회원가입에 실패하셨습니다.'}, status=accept_status)
-        # user의 pk, email, first name, last name과 Access Token, Refresh token 가져옴
         accept_json = accept.json()
         accept_json.pop('user', None)
         return JsonResponse(accept_json)
