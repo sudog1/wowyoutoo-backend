@@ -1,7 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import Scenario
+from .models import Scenario, Word
+from .serializers import WordQuizesSerializer
+import random
 
 # import g4f as openai
 
@@ -32,7 +35,22 @@ class PassageView(APIView):
 
 class WordView(APIView):
     def get(self, requset):
-        pass
+        quizes = []
+        for i in range(10):
+            all_words = list(Word.objects.all())
+            correct_word = random.choice(all_words)
+            all_words.remove(correct_word)
+            wrong_words = random.sample(all_words, 3)
+            
+            quize = {
+                "word":correct_word.content,
+                "meaning":correct_word.meaning,
+                "wrong":[word.meaning for word in wrong_words]
+            }
+            quizes.append(quize)
+        serializer = WordQuizesSerializer(quizes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
 
     def post(self, request):
         pass
