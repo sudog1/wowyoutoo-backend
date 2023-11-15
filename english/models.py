@@ -12,29 +12,27 @@ class Select(models.Model):
     select = models.SmallIntegerField(
         validators=[MaxValueValidator(3), MinValueValidator(0)]
     )
-    user = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="selects"
-    )
 
 
-class ReadingProblem(models.Model):
+class ReadingQuiz(models.Model):
     title = models.CharField(max_length=100)
     paragraph = models.TextField()
+    answers = models.JSONField()
     solution = models.IntegerField(
         validators=[
             MinValueValidator(0),
             MaxValueValidator(3),
         ]
     )
-    answers = models.JSONField()
+    explanation = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     level = models.ForeignKey(
-        Level, on_delete=models.PROTECT, related_name="reading_problems"
+        Level, on_delete=models.PROTECT, related_name="reading_quizzes"
     )
     users = models.ManyToManyField(
         AUTH_USER_MODEL,
         through=Select,
-        related_name="reading_problems",
+        related_name="reading_quizzes",
     )
 
 

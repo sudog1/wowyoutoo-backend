@@ -1,18 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import ReadingProblem
+from .models import ReadingQuiz
 from rest_framework import status
 from .constants import content
 import g4f as openai
 import json
-
-from g4f.Provider import (
-    AiAsk,
-    ChatgptAi,
-    GptGo,
-    FreeGpt,
-)
+from .models import Word, ReadingQuiz
+from .serializers import WordQuizesSerializer, WordSerializer, ReadingQuizSerializer
 
 
 # Create your views here.
@@ -29,13 +25,13 @@ class ReadingView(APIView):
         # 복습노트에 저장
         if problem_id:
             user = request.user
-            problem = get_object_or_404(ReadingProblem, pk=problem_id)
+            problem = get_object_or_404(ReadingQuiz, pk=problem_id)
             problems = user.reading_problems
             if problem not in problems:
                 problems.add(problem)
                 return Response({"detail": "저장 완료"}, status=status.HTTP_200_OK)
             return Response({"detail": "이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST)
-        # 단어 생성
+        # 문장 생성
         else:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
@@ -49,14 +45,39 @@ class ReadingView(APIView):
                 # stream=True,
             )
             response = json.loads(response)
+            serializer = ReadingQuizSerializer(data=response)
+            if serializer.is_valid():
+                serializer.save()
 
-    def delete(self, request, problem_id=None):
+    def delete(self, request, problem_id):
         pass
 
 
 class WordView(APIView):
     def get(self, requset):
-        pass
+        quizes = []
+        # Word 전체 리스트를 랜덤하게 정렬한 뒤 40개 가져오기
+        all_words = list(Word.objects.order_by("?")[:40])
+        correct_words = all_words[:10]
+        remain_words = all_words[10:]
+        for i in range(10):
+            # 0번째 단어
+            # 1번째 단어
+            # 2번째 단어
+            correct_word = correct_words[i]
+            # 0~2번째 틀린 단어
+            # 3~5번째 틀린 단어
+            # 6~8번째 틀린 단어
+            wrong_words = remain_words[i * 3 : (i + 1) * 3]
+
+            quize = {
+                "word": correct_word.content,
+                "meaning": correct_word.meaning,
+                "wrong": [word.meaning for word in wrong_words],
+            }
+            quizes.append(quize)
+        # serializer = WordQuizesSerializer(quizes, many=True)
+        return Response(quizes, status=status.HTTP_200_OK)
 
     def post(self, request):
         pass
@@ -64,7 +85,19 @@ class WordView(APIView):
 
 class WordsBookView(APIView):
     def get(self, request, user_id):
-        pass
+        words = Word.objects.filter(user__pk=user_id)
+        if words.exists():
+            serializer = WordSerializer(words, many=True)
+            serialized_words = serializer.data
+
+            # response_data = {"vocabulary": [{"word":word["content"], "meaning":word["meaning"]} for word in serialized_words]}
+            response_data = {"vocabulary": serialized_words}
+            return Response(response_data, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"No words associated with this user."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
     def post(self, request, word_id):
         pass
