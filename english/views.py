@@ -1,16 +1,18 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import Scenario
+from .models import ReadingProblem
+from rest_framework import status
+from .constants import content
+import g4f as openai
+import json
 
-# import g4f as openai
-
-# from g4f.Provider import (
-#     AiAsk,
-#     ChatgptAi,
-#     GptGo,
-#     FreeGpt,
-# )
+from g4f.Provider import (
+    AiAsk,
+    ChatgptAi,
+    GptGo,
+    FreeGpt,
+)
 
 
 # Create your views here.
@@ -19,14 +21,36 @@ class PassageCreateView(APIView):
         pass
 
 
-class PassageView(APIView):
-    def get(self, requset, passage_id=None):
+class ReadingView(APIView):
+    def get(self, requset, problem_id=None):
         pass
 
-    def post(self, request):
-        pass
+    def post(self, request, problem_id=None):
+        # 복습노트에 저장
+        if problem_id:
+            user = request.user
+            problem = get_object_or_404(ReadingProblem, pk=problem_id)
+            problems = user.reading_problems
+            if problem not in problems:
+                problems.add(problem)
+                return Response({"detail": "저장 완료"}, status=status.HTTP_200_OK)
+            return Response({"detail": "이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST)
+        # 단어 생성
+        else:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                provider=openai.Provider.GptGo,
+                response_format={"type": "json_object"},
+                messages=[
+                    {"role": "system", "content": content},
+                ],
+                temperature=2,
+                finish_reason="length",
+                # stream=True,
+            )
+            response = json.loads(response)
 
-    def delete(self, request, passage_id):
+    def delete(self, request, problem_id=None):
         pass
 
 
