@@ -3,8 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Scenario, Word
-from .serializers import WordQuizesSerializer, WordSerializer
-import random
+from .serializers import WordQuizesSerializer, MyWordSerializer, WordSerializer
+from deep_translator import (GoogleTranslator,
+                             DeeplTranslator,)
 
 # import g4f as openai
 
@@ -32,57 +33,94 @@ class PassageView(APIView):
     def delete(self, request, passage_id):
         pass
 
-
-class WordView(APIView):
-    def get(self, requset):
-        quizes = []
-        # Word 전체 리스트를 랜덤하게 정렬한 뒤 40개 가져오기
-        all_words = list(Word.objects.order_by("?")[:40])
-        correct_words = all_words[:10]
-        remain_words = all_words[10:]
-        for i in range(10):
-            # 0번째 단어
-            # 1번째 단어
-            # 2번째 단어
-            correct_word = correct_words[i]
-            # 0~2번째 틀린 단어
-            # 3~5번째 틀린 단어
-            # 6~8번째 틀린 단어
-            wrong_words = remain_words[i*3:(i+1)*3]
-            
-            quize = {
-                "word":correct_word.content,
-                "meaning":correct_word.meaning,
-                "wrong":[word.meaning for word in wrong_words]
-            } 
-            quizes.append(quize)
-        # serializer = WordQuizesSerializer(quizes, many=True)
-        return Response(quizes, status=status.HTTP_200_OK)
         
+class WordView(APIView):
+    CORRECT_WORDS_COUNT = 10
+    WRONG_WORDS_PER_QUIZ = 3
 
+    #단어 퀴즈 보기
+    def get(self, request):
+        try:
+            # Word 전체 리스트를 랜덤하게 정렬한 뒤 40개 가져오기
+            all_words = list(Word.objects.order_by("?")[:40])
+            correct_words = all_words[:self.CORRECT_WORDS_COUNT]
+            remain_words = all_words[self.CORRECT_WORDS_COUNT:]
+
+            quizzes = []
+            for index in range(self.CORRECT_WORDS_COUNT):
+                
+                # 0번째 단어
+                # 1번째 단어
+                # 2번째 단어
+                correct_word = correct_words[index]
+                
+                # 0~2번째 틀린 단어
+                # 3~5번째 틀린 단어
+                # 6~8번째 틀린 단어
+                wrong_words = remain_words[index * self.WRONG_WORDS_PER_QUIZ:(index + 1) * self.WRONG_WORDS_PER_QUIZ]
+
+                quiz = {
+                    "word": correct_word.content,
+                    "meaning": correct_word.meaning,
+                    "wrong": [word.meaning for word in wrong_words]
+                }
+                quizzes.append(quiz)
+
+            # serializer = WordQuizesSerializer(quizes, many=True)
+            return Response(quizzes, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+    #DB 단어장에 단어 추가
     def post(self, request):
-        pass
+        content = request.data["word"]
+        words = Word.objects.all()
+        if content not in words:
+            meaning = GoogleTranslator(source='en', target='ko').translate(text=content)
+            new_word = Word(content=content, meaning=meaning)
+            new_word.save()
+            serializer = WordSerializer(new_word)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({"detail": "단어가 이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WordsBookView(APIView):
-    def get(self, request, user_id):
-        words = Word.objects.filter(user__pk=user_id)
+    #내 단어장 보기
+    def get(self, request):
+        user = request.user
+        words = user.words
         if words.exists():
-            serializer = WordSerializer(words, many=True)
+            serializer = MyWordSerializer(words, many=True)
             serialized_words = serializer.data
             
             # response_data = {"vocabulary": [{"word":word["content"], "meaning":word["meaning"]} for word in serialized_words]}
             response_data = {"vocabulary": serialized_words}
             return Response(response_data, status=status.HTTP_200_OK)
         else:
-            return Response({"No words associated with this user."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "내 단어장에 저장된 단어가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
 
+    #내 단어장에 단어 추가
     def post(self, request, word_id):
-        pass
+        user = request.user
+        words = user.words
+        word = get_object_or_404(Word, pk=word_id)
+        if word not in words:
+            words.add(word)
+            return Response({"detail": "내 단어장에 단어가 추가되었습니다."}, status=status.HTTP_200_OK)
+        return Response({"detail": "내 단어장에 단어가 이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, user_id, word_id):
-        pass
+
+    #내 단어장의 단어 삭제
+    def delete(self, request, word_id):
+        user = request.user
+        words = user.words # 유저의 단어장에 있는 모든 단어
+        word = get_object_or_404(Word, pk=word_id)
+        if word in words:
+            words.remove(word)
+            return Response({"detail": "삭제되었습니다."}, status=status.HTTP_200_OK)
+        return Response({"detail": "단어가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # class DialogueView(APIView):
