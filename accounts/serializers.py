@@ -14,7 +14,6 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from django.db import transaction
 
 
-
 class CustomRegisterSerializer(RegisterSerializer):
     nickname = serializers.CharField(max_length=20)
 
@@ -25,7 +24,6 @@ class CustomRegisterSerializer(RegisterSerializer):
         user.nickname = self.data.get("nickname")
         user.save()
         return user
-
 
 
 # class UserSerializer(serializers.ModelSerializer):
