@@ -7,7 +7,7 @@ from rest_framework import status
 from .constants import content
 import g4f as openai
 import json
-from .models import Word, ReadingQuiz
+from .models import Word, ReadingQuiz, Level
 from .serializers import WordQuizesSerializer, WordSerializer, ReadingQuizSerializer
 
 
@@ -18,17 +18,17 @@ class PassageCreateView(APIView):
 
 
 class ReadingView(APIView):
-    def get(self, requset, problem_id=None):
+    def get(self, requset, quiz_id=None):
         pass
 
-    def post(self, request, problem_id=None):
+    def post(self, request, quiz_id=None):
         # 복습노트에 저장
-        if problem_id:
+        if quiz_id:
+            select = request.data.get("select")
             user = request.user
-            problem = get_object_or_404(ReadingQuiz, pk=problem_id)
-            problems = user.reading_problems
-            if problem not in problems:
-                problems.add(problem)
+            quiz = get_object_or_404(ReadingQuiz, pk=quiz_id)
+            if quiz not in user.reading_quizzes.all():
+                user.reading_quizzes.add(quiz, through_defaults={"select": select})
                 return Response({"detail": "저장 완료"}, status=status.HTTP_200_OK)
             return Response({"detail": "이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST)
         # 문장 생성
@@ -46,10 +46,13 @@ class ReadingView(APIView):
             )
             response = json.loads(response)
             serializer = ReadingQuizSerializer(data=response)
+            level = Level.objects.get(name="C1")
             if serializer.is_valid():
-                serializer.save()
+                serializer.save(level=level)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response({"detail": "생성 실패"}, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, problem_id):
+    def delete(self, request, quiz_id):
         pass
 
 

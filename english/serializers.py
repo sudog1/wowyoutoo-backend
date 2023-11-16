@@ -27,7 +27,7 @@ class WordQuizesSerializer(serializers.Serializer):
         )
 
 
-class ReadingQuizSerializer(serializers.Serializer):
+class ReadingQuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReadingQuiz
         fields = (

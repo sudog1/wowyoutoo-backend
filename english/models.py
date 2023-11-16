@@ -8,12 +8,6 @@ class Level(models.Model):
     name = models.CharField(max_length=10)
 
 
-class Select(models.Model):
-    select = models.SmallIntegerField(
-        validators=[MaxValueValidator(3), MinValueValidator(0)]
-    )
-
-
 class ReadingQuiz(models.Model):
     title = models.CharField(max_length=100)
     paragraph = models.TextField()
@@ -31,8 +25,20 @@ class ReadingQuiz(models.Model):
     )
     users = models.ManyToManyField(
         AUTH_USER_MODEL,
-        through=Select,
+        through="Select",
         related_name="reading_quizzes",
+    )
+
+
+class Select(models.Model):
+    select = models.SmallIntegerField(
+        validators=[MaxValueValidator(3), MinValueValidator(0)]
+    )
+    user = models.ForeignKey(
+        AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="selects"
+    )
+    reading_quiz = models.ForeignKey(
+        ReadingQuiz, on_delete=models.CASCADE, related_name="selects"
     )
 
 
