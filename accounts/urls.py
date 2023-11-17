@@ -9,14 +9,8 @@ from dj_rest_auth.registration.views import VerifyEmailView
 
 urlpatterns = [
     path('kakao/login/', views.KakaoLogin.as_view(), name='kakao_login'),
-    #     path('kakao/callback/', views.KakaoCallback.as_view(), name='kakao_callback'),
-    #     path('kakao/login/finish/', views.KakaoLogin.as_view(),
-    #          name='kakao_login_todjango'),
 
-    path('github/login/', views.github_login, name='github_login'),
-    #     path('github/callback/', views.github_callback, name='github_callback'),
-    #     path('github/login/finish/', views.GithubLogin.as_view(),
-    #          name='github_login_todjango'),
+    path('github/login/', views.GithubLogin.as_view(), name='github_login'),
 
     path("signup/", views.CustomRegisterView.as_view(), name="signup"),  # 회원가입
     path("dj-rest-auth/", include("dj_rest_auth.urls")),  # 로그인
