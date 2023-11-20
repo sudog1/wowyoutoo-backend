@@ -52,8 +52,14 @@ class ReadingView(APIView):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response({"detail": "생성 실패"}, status=status.HTTP_400_BAD_REQUEST)
 
+    # 복습노트에서 제거
     def delete(self, request, quiz_id):
-        pass
+        user = request.user
+        quiz = get_object_or_404(ReadingQuiz, pk=quiz_id)
+        if quiz in user.reading_quizzes.all():
+            user.reading_quizzes.remove(quiz)
+            return Response({"detail": "제거 완료"}, status=status.HTTP_200_OK)
+        return Response({"detail": "이미 제거되었습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WordView(APIView):
