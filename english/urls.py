@@ -10,12 +10,8 @@ urlpatterns = [
     path("reading/<quiz_id>/", views.ReadingView.as_view(), name="reading_detail"),
     # db에 단어추가,단어시험보기
     path("word/", views.WordView.as_view(), name="word"),
-    # 내 단어장에 단어추가
-    path("word/<word_id>/", views.WordsBookView.as_view(), name="append_word"),
+    # 내 단어장에 단어추가, 제거
+    path("wordsbook/<word_id>/", views.WordsBookView.as_view(), name="wordsbook"),
     # 내 단어장 조회
-    path("<user_id>/word/", views.WordsBookView.as_view(), name="wordsbook"),
-    # 내 단어장에서 단어제거
-    path(
-        "<user_id>/word/<word_id>/", views.WordsBookView.as_view(), name="delete_word"
-    ),
+    path("wordsbook/", views.WordsBookView.as_view(), name="wordsbook_list"),
 ]

@@ -3,6 +3,15 @@ from .models import Word, ReadingQuiz
 
 
 class WordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Word
+        fields = (
+            "content",
+            "meaning",
+        )
+
+
+class MyWordSerializer(serializers.ModelSerializer):
     word = serializers.CharField(source="content")
 
     class Meta:
