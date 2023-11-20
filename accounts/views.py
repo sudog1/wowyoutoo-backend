@@ -22,12 +22,8 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from json.decoder import JSONDecodeError
 import json
 from dj_rest_auth.registration.views import RegisterView
-
-
-state = os.environ.get("STATE")
-BASE_URL = 'http://127.0.0.1:8000/'
-KAKAO_CALLBACK_URI = BASE_URL + 'accounts/kakao/callback/'
-GITHUB_CALLBACK_URI = BASE_URL + 'accounts/github/callback/'
+from django.contrib.auth import login
+from allauth.account.models import EmailConfirmation
 
 
 # dj-rest-auth 이메일 인증 로직
@@ -76,18 +72,6 @@ class ConfirmEmailView(APIView):
         return qs
 
 
-# class SignupView(APIView):
-#     def post(self, request):
-#         # 사용자 정보를 받아서 회원을 생성합니다.
-#         serializer = UserSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response({"message ": "가입완료!"}, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(
-#                 {"massage": f"${serializer.errors}"}, status=status.HTTP_400_BAD_REQUEST
-#             )
-
 class CustomRegisterView(RegisterView):
     serializer_class = CustomRegisterSerializer
     permission_classes = [permissions.AllowAny]
@@ -105,161 +89,139 @@ class Token_Test(APIView):
         return Response("get요청")
 
 
-"""Kakao 로그인 호출:
-Kakao 로그인을 구현하기 위해 필요한 REST API 키를 얻고
-사용자를 Kakao 인증 화면으로 리디렉션하는 URL을 생성"""
+class KakaoLogin(APIView):
+    def post(self, request):
+
+        state = os.environ.get("STATE")
+        client_id = os.environ.get("KAKAO_REST_API_KEY")
+
+        received_code = request.data.get('code')  # 받은 ?code='' 값
+        code_value = received_code.split("?code=")[-1]  # 코드 값만 추출
+        print(code_value)
+
+        kakao_token = requests.post(
+            "https://kauth.kakao.com/oauth/token",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data={
+                "grant_type": "authorization_code",
+                "client_id": client_id,
+                "redirect_uri": "http://127.0.0.1:5500/templates/redirect.html",
+                "code": code_value
+            },
+        )
+        print(kakao_token.json()['access_token'])  # access_token 발급 완료
+        access_token = kakao_token.json()['access_token']
+        refresh_token = kakao_token.json()['refresh_token']
+
+        token_data = {'access': access_token, 'refresh': refresh_token}
+        # access_token 으로 사용자 정보 가져오기
+        user_data = requests.get(
+            "https://kapi.kakao.com/v2/user/me",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        # 이메일, 닉네임, 프로필 사진 가져오기
+        # print(user_data.json())
+        user_data = user_data.json()
+
+        kakao_account = user_data.get('kakao_account')
+        user_email = kakao_account.get('email')
+        user_nickname = kakao_account.get('profile')['nickname']
+        user_img = kakao_account.get('profile')['profile_image_url']
+        # print(user_email, user_nickname, user_img)
+
+        # 유저의 이메일이 존재하지 않으면 저장 / 존재하면 오류 출력
+        try:
+            user = User.objects.get(email=user_email)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            print(user.nickname, user.email, "password", user.password)
+
+            token_data['user_profile'] = {'uid': user.id, 'email': user.email}
+            return Response(data=token_data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            user = User.objects.create(
+                email=user_email,
+                nickname=user_nickname,
+                profile_img=user_img,
+            )
+            user.set_unusable_password()
+            user.save()
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            print(user.nickname, user.email, "password", user.password)
+
+            token_data['user_profile'] = {'uid': user.id, 'email': user.email}
+            return Response(data=token_data, status=status.HTTP_200_OK)
+        except Exception:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-def kakao_login(request):
-    rest_api_key = os.environ.get('KAKAO_REST_API_KEY')
-    return redirect(
-        f"https://kauth.kakao.com/oauth/authorize?client_id={rest_api_key}&redirect_uri={KAKAO_CALLBACK_URI}&response_type=code"
-    )
+class GithubLogin(APIView):
+    def post(self, request):
 
+        state = os.environ.get("STATE")
+        client_id = os.environ.get("SOCIAL_AUTH_GITHUB_CLIENT_ID")
+        client_secret = os.environ.get("SOCIAL_AUTH_GITHUB_SECRET")
 
-"""Kakao 콜백 처리:
-Kakao에서 제공하는 콜백 URL에서는 인가 코드를 받아오고
-받아온 인가 코드를 사용하여 Kakao로부터 액세스 토큰을 요청."""
+        received_code = request.data.get('code')
+        code_value = received_code.split("?code=")[-1]
 
+        """토큰"""
+        github_token = requests.post(
+            f"https://github.com/login/oauth/access_token",
+            headers={'Accept': 'application/json'},
+            data={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "redirect_url": "http://127.0.0.1:5500/templates/redirect.html",
+                "code": code_value,
+            },
+        )
 
-def kakao_callback(request):
+        print(github_token.json()['access_token'])
+        access_token = github_token.json()['access_token']
+        refresh_token = github_token.json()['refresh_token']
 
-    rest_api_key = os.environ.get("KAKAO_REST_API_KEY")
-    code = request.GET.get("code")
-    redirect_uri = KAKAO_CALLBACK_URI
+        token_data = {'access': access_token, 'refresh': refresh_token}
 
-    token_req = requests.get(
-        f"https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id={rest_api_key}&redirect_uri={redirect_uri}&code={code}")
-    token_req_json = token_req.json()
-    error = token_req_json.get("error")
+        """유저 데이터"""
+        user_data = requests.get(
+            "https://api.github.com/user",
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Accept": "application/json",
+            },
+        )
 
-    # 에러 발생 시 종료
-    if error is not None:
-        raise JSONDecodeError(error)
+        user_data = user_data.json()
+        print(user_data)
 
-    # access_token 가져오기
-    access_token = token_req_json.get('access_token')
+        """유저 이메일"""
+        user_emails = requests.get(
+            "https://api.github.com/user/emails",
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Accept": "application/json",
+            },
+        )
+        user_emails = user_emails.json()
+        print(user_emails)
+        try:
+            user = User.objects.get(email=user_emails[0]["email"])
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
 
-    # 카카오톡 프로필, 배경 이미지 url, 이메일 가져올수있음
-    profile_request = requests.get(
-        "https://kapi.kakao.com/v2/user/me", headers={"Authorization": f"Bearer {access_token}"})
-    profile_json = profile_request.json()
-    error = profile_json.get("error")
+            token_data['user_profile'] = {'uid': user.id, 'email': user.email}
+            return Response(data=token_data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            user = User.objects.create(
+                nickname=user_data.get("login"),
+                email=user_emails[0]["email"],
+                profile_img=user_data.get("avatar_url"),
+            )
+            user.set_unusable_password()    # password 없음
+            user.save()
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            print(user.nickname, user.email, "password", user.password)
 
-    if error is not None:
-        raise JSONDecodeError(error)
-    kakao_account = profile_json.get('kakao_account')
-    email = kakao_account.get('email')
-    nickname = kakao_account.get('nickname')
-
-    """사용자 처리 및 응답:
-    Kakao로부터 받아온 사용자 프로필 정보를 로컬 데이터베이스에서 사용자를 확인하고 처리
-    처리 결과에 따라 로그인 또는 회원가입을 수행하고, 결과를 JSON 형식으로 반환"""
-
-    try:
-        user = User.objects.get(email=email)
-        # 기존에 가입된 유저의 Provider가 kakao가 아니면 에러 발생, 맞으면 로그인
-        # 다른 SNS로 가입된 유저
-        social_user = SocialAccount.objects.get(user=user)
-        if social_user is None:
-            return JsonResponse({'err_msg': '이미 존재하는 이메일입니다.'}, status=status.HTTP_400_BAD_REQUEST)
-        if social_user.provider != 'kakao':
-            return JsonResponse({'err_msg': '카카오 메일에 등록되지않은 계정입니다.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        data = {'access_token': access_token, 'code': code}
-        accept = requests.post(
-            f"{BASE_URL}accounts/kakao/login/finish/", data=data)
-        accept_status = accept.status_code
-        if accept_status != 200:
-            return JsonResponse({'err_msg': '로그인에 실패하셨습니다.'}, status=accept_status)
-        accept_json = accept.json()
-        accept_json.pop('user', None)
-        return JsonResponse(accept_json)
-    except User.DoesNotExist:
-        # 기존에 가입된 유저가 없으면 새로 가입
-        data = {'access_token': access_token, 'code': code}
-        accept = requests.post(
-            f"{BASE_URL}accounts/kakao/login/finish/", data=data)
-        accept_status = accept.status_code
-        if accept_status != 200:
-            return JsonResponse({'err_msg': '회원가입에 실패하셨습니다.'}, status=accept_status)
-        accept_json = accept.json()
-        accept_json.pop('user', None)
-        return JsonResponse(accept_json)
-
-
-class KakaoLogin(SocialLoginView):
-    adapter_class = kakao_view.KakaoOAuth2Adapter
-    client_class = OAuth2Client
-    callback_url = KAKAO_CALLBACK_URI
-
-
-def github_login(request):
-    client_id = os.environ.get('SOCIAL_AUTH_GITHUB_CLIENT_ID')
-    return redirect(
-        f"https://github.com/login/oauth/authorize?client_id={client_id}&redirect_uri={GITHUB_CALLBACK_URI}"
-    )
-
-
-def github_callback(request):
-
-    client_id = os.environ.get("SOCIAL_AUTH_GITHUB_CLIENT_ID")
-    client_secret = os.environ.get('SOCIAL_AUTH_GITHUB_SECRET')
-    code = request.GET.get("code")
-
-    token_req = requests.post(
-        f"https://github.com/login/oauth/access_token?client_id={client_id}&client_secret={client_secret}&code={code}&accept=&json&redirect_uri={GITHUB_CALLBACK_URI}&response_type=code", headers={'Accept': 'application/json'})
-    token_req_json = token_req.json()
-    error = token_req_json.get("error")
-    if error is not None:
-        raise JSONDecodeError(error)
-    access_token = token_req_json.get('access_token')
-    """
-    Email Request
-    """
-    user_req = requests.get(f"https://api.github.com/user",
-                            headers={"Authorization": f"Bearer {access_token}"})
-    user_json = user_req.json()
-    error = user_json.get("error")
-    if error is not None:
-        raise JSONDecodeError(error)
-    print(user_json)
-    email = user_json.get("email")
-
-    try:
-        user = User.objects.get(email=email)
-        # 기존에 가입된 유저의 Provider가 github가 아니면 에러 발생, 맞으면 로그인
-        # 다른 SNS로 가입된 유저
-        social_user = SocialAccount.objects.get(user=user)
-        if social_user is None:
-            return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
-        if social_user.provider != 'github':
-            return JsonResponse({'err_msg': 'no matching social type'}, status=status.HTTP_400_BAD_REQUEST)
-        # 기존에 github로 가입된 유저
-        data = {'access_token': access_token, 'code': code}
-        accept = requests.post(
-            f"{BASE_URL}accounts/github/login/finish/", data=data)
-        accept_status = accept.status_code
-        if accept_status != 200:
-            return JsonResponse({'err_msg': 'failed to signin'}, status=accept_status)
-        accept_json = accept.json()
-        accept_json.pop('user', None)
-        return JsonResponse(accept_json)
-    except User.DoesNotExist:
-        # 기존에 가입된 유저가 없으면 새로 가입
-        data = {'access_token': access_token, 'code': code}
-        accept = requests.post(
-            f"{BASE_URL}accounts/github/login/finish/", data=data)
-        accept_status = accept.status_code
-        if accept_status != 200:
-            return JsonResponse({'err_msg': 'failed to signup'}, status=accept_status)
-        # user의 pk, email, first name, last name과 Access Token, Refresh token 가져옴
-        accept_json = accept.json()
-        accept_json.pop('user', None)
-        return JsonResponse(accept_json)
-
-
-class GithubLogin(SocialLoginView):
-    adapter_class = github_view.GitHubOAuth2Adapter
-    callback_url = GITHUB_CALLBACK_URI
-    client_class = OAuth2Client
+            token_data['user_profile'] = {'uid': user.id, 'email': user.email}
+            return Response(data=token_data, status=status.HTTP_200_OK)
+        except Exception:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
