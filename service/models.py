@@ -44,3 +44,12 @@ class QnaResponse(models.Model):
         blank=True,
         null=True,
     )
+
+class AdMail(models.Model):
+     title=models.CharField(max_length=60)
+     content=models.TextField()
+     image=models.ImageField(
+        upload_to="media/service/ad_mail",
+        blank=True,
+        null=True,
+    )

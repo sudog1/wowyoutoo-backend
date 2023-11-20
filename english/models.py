@@ -32,10 +32,6 @@ class Select(models.Model):
     passage = models.ForeignKey(ReadingPassage, on_delete=models.CASCADE,related_name='selects')
 
 
-
-class Difficult(models.Model):
-    step = models.IntegerField(validators=[MinValueValidator(1)])
-
 class Word(models.Model):
     content = models.CharField(max_length=30)
     meaning = models.CharField(max_length=30)

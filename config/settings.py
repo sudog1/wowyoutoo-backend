@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import environ
 from pathlib import Path
 from datetime import timedelta
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -94,7 +95,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        'DIRS': [os.path.join(BASE_DIR, 'service', 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -215,3 +216,19 @@ MEDIA_URL = "/media/"
 
 
 STATIC_URL = "/static/"
+
+CELERY_ALWAYS_EAGER = True
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379' #redis서버의 주소와 다르면 바꾸세요 
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Seoul'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'newjh20201001@gmail.com'
+EMAIL_HOST_PASSWORD = 'ikei gkzi fsje uvon'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
