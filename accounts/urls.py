@@ -11,7 +11,7 @@ urlpatterns = [
     path('kakao/login/', views.KakaoLogin.as_view(), name='kakao_login'),
 
     path('github/login/', views.GithubLogin.as_view(), name='github_login'),
-
+    path("login/", views.HomeView.as_view(), name="home"),
     path("signup/", views.CustomRegisterView.as_view(), name="signup"),  # 회원가입
     path("dj-rest-auth/", include("dj_rest_auth.urls")),  # 로그인
     re_path(r"^account-confirm-email/$", VerifyEmailView.as_view(), name="account_email_verification_sent",
