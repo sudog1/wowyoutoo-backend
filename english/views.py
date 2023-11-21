@@ -39,7 +39,6 @@ class ReadingView(APIView):
         else:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
-                provider=openai.Provider.GptGo,
                 response_format={"type": "json_object"},
                 messages=[
                     {"role": "system", "content": content},
