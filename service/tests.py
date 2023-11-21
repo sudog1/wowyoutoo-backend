@@ -24,4 +24,10 @@ class AnnouncementTest(APITestCase):
     def test_get_announcement_detail(self):
         response=self.client.get(path=reverse("service"),HTTP_AUTHORIZATION="Bearer {}".format(self.admin_access))
         self.assertEqual(response.status_code,200)
-    
+
+class TestTest(APITestCase):
+
+    def test_sig_group(self):
+        response=self.client.get(path=reverse("test"))
+        self.assertEqual(response.status_code,200)
+
