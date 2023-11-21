@@ -125,7 +125,7 @@ class BackOfficeView(APIView):
         return Response({"detail":"인증되었습니다"},status=status.HTTP_200_OK)
     
     def post(self,request):
-        email_list = list(User.objects.filter(verified=True).only("email").values_list('email', flat=True))#flat을 사용하지않으면 리스트에 튜플이 담겨나옵니다 
+        email_list = list(User.objects.filter(verified=True).only("email","verified").values_list('email', flat=True))#flat을 사용하지않으면 리스트에 튜플이 담겨나옵니다 
         serializer=AdMailSerializer(data=request.data) 
         if serializer.is_valid():
             serializer.save()
