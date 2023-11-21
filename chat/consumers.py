@@ -1,8 +1,11 @@
 import json
-import g4f as openai
+from openai import OpenAI
 from asgiref.sync import sync_to_async
 from .constants import content
+from config.settings import OPENAI_API_KEY
 from channels.generic.websocket import AsyncWebsocketConsumer
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 class ChatBotConsumer(AsyncWebsocketConsumer):
@@ -42,7 +45,7 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
     @classmethod
     @sync_to_async
     def get_bot_answer(cls, messages):
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
             temperature=2,

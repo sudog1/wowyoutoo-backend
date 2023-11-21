@@ -5,14 +5,17 @@ from django.shortcuts import get_object_or_404
 from .models import ReadingQuiz
 from rest_framework import status
 from .constants import content
-import g4f as openai
+from openai import OpenAI
 import json
+from config.settings import OPENAI_API_KEY
 from .models import Word, ReadingQuiz, Level
 from .serializers import WordQuizesSerializer, WordSerializer, ReadingQuizSerializer
 from deep_translator import (
     GoogleTranslator,
     DeeplTranslator,
 )
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 # Create your views here.
@@ -37,7 +40,7 @@ class ReadingView(APIView):
             return Response({"detail": "이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST)
         # 문장 생성
         else:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 response_format={"type": "json_object"},
                 messages=[
@@ -48,7 +51,8 @@ class ReadingView(APIView):
                 # stream=True,
             )
             response = json.loads(response)
-            serializer = ReadingQuizSerializer(data=response)
+            data = response["choices"][0]["message"]["content"]
+            serializer = ReadingQuizSerializer(data=data)
             level = Level.objects.get(name="C1")
             if serializer.is_valid():
                 serializer.save(level=level)
