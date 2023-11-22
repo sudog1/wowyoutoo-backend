@@ -55,7 +55,8 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField("관리자 여부", default=False)
     verified = models.BooleanField(default=False)
     agree_terms = models.BooleanField("서비스 이용약관 동의", default=False, null=True)
-    reading_nums = models.PositiveIntegerField()
+    readings_num = models.PositiveIntegerField(default=0)
+    words_num = models.PositiveIntegerField(default=0)
     chat_coin = models.SmallIntegerField(default=10)
     reading_coin = models.SmallIntegerField(default=30)
 
