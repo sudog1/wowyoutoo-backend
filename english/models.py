@@ -5,7 +5,7 @@ from config.settings import AUTH_USER_MODEL
 
 # Create your models here.
 class Level(models.Model):
-    name = models.CharField(max_length=10)
+    step = models.CharField(max_length=10)
 
 
 class ReadingQuiz(models.Model):
@@ -32,7 +32,7 @@ class ReadingQuiz(models.Model):
 
 
 class Select(models.Model):
-    select = models.SmallIntegerField(
+    index = models.SmallIntegerField(
         validators=[MaxValueValidator(3), MinValueValidator(0)]
     )
     user = models.ForeignKey(

@@ -36,10 +36,20 @@ class WordQuizesSerializer(serializers.Serializer):
         )
 
 
+class ReadingQuizListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReadingQuiz
+        fields = (
+            "pk",
+            "title",
+        )
+
+
 class ReadingQuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReadingQuiz
         fields = (
+            "pk",
             "title",
             "paragraph",
             "question",

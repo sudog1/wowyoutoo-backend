@@ -15,3 +15,5 @@ content = """
     - "solution": <zero-based index of correct answer>
     - "explanation": <explanation>
 """
+
+READING_QUIZ_COUNT = 10
