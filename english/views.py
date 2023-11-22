@@ -9,6 +9,7 @@ import g4f as openai
 import json
 from .models import Word, ReadingQuiz, Level
 from .serializers import (
+    MyWordSerializer,
     ReadingQuizListSerializer,
     WordQuizesSerializer,
     WordSerializer,
@@ -183,7 +184,7 @@ class WordsBookView(APIView):
     # 내 단어장에 단어 추가
     def post(self, request, word_id):
         user = request.user
-        words = user.words
+        words = user.words.all()
         word = get_object_or_404(Word, pk=word_id)
         if word not in words:
             words.add(word)
@@ -197,12 +198,14 @@ class WordsBookView(APIView):
     # 내 단어장의 단어 삭제
     def delete(self, request, word_id):
         user = request.user
-        words = user.words  # 유저의 단어장에 있는 모든 단어
+        words = user.words.all()  # 유저의 단어장에 있는 모든 단어
         word = get_object_or_404(Word, pk=word_id)
         if word in words:
             words.remove(word)
             return Response({"detail": "삭제되었습니다."}, status=status.HTTP_200_OK)
-        return Response({"detail": "단어가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"detail": "단어가 이미 삭제되었습니다."}, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 # class DialogueView(APIView):
