@@ -41,6 +41,11 @@ from allauth.account.models import EmailConfirmation
 """
 
 
+class HomeView(APIView):
+    def get(self, key):
+        return redirect("http://127.0.0.1:5500/login.html")
+
+
 class ConfirmEmailView(APIView):
     permission_classes = [AllowAny]
 
