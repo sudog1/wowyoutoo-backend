@@ -22,4 +22,6 @@ urlpatterns = [
          name="token_obtain_pair",),
 
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("profile/<int:user_id>/", views.ProfileView.as_view(), name="profile"),
+
 ]

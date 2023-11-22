@@ -14,6 +14,20 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from django.db import transaction
 
 
+class ProfileSerializer(serializers.ModelSerializer):
+    # readings_num = serializers.StringRelatedField(many=True)
+    # words_num = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        model = User
+        fields = (
+            "nickname",
+            "email",
+            "profile_img",
+            "created_at",
+        )
+
+
 class CustomRegisterSerializer(RegisterSerializer):
     nickname = serializers.CharField(max_length=20)
 
