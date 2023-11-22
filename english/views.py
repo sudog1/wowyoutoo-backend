@@ -42,6 +42,7 @@ class ReadingView(APIView):
         else:
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
+                provider=openai.Provider.Liaobots,
                 response_format={"type": "json_object"},
                 messages=[
                     {"role": "system", "content": content},

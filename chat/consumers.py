@@ -47,6 +47,7 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
     def get_bot_answer(cls, messages):
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
+            provider=openai.Provider.Liaobots,
             messages=messages,
             temperature=2,
             finish_reason="length",

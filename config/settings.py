@@ -1,6 +1,7 @@
 import environ
 from pathlib import Path
 from datetime import timedelta
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -105,6 +106,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
+        # 'DIRS': [os.path.join(BASE_DIR, 'service', 'templates')],
         "DIRS": [BASE_DIR, "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -255,6 +257,16 @@ EMAIL_HOST_USER = "danielhochan1@gmail.com"  # 발신할 이메일
 EMAIL_HOST_PASSWORD = "zxpm kdwl iqfl bxnm"  # 발신할 메일의 비밀번호
 EMAIL_USE_TLS = True  # TLS 보안 방법
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 사이트와 관련한 자동응답을 받을 이메일 주소
+
+STATIC_URL = "/static/"
+
+CELERY_ALWAYS_EAGER = True
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379' #redis서버의 주소와 다르면 바꾸세요 
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Seoul'
 
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # 유저가 받은 링크를 클릭하면 회원가입 완료되게끔
 ACCOUNT_EMAIL_REQUIRED = True
