@@ -2,59 +2,100 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import ReadingQuiz
+from .models import ReadingQuiz, Select
 from rest_framework import status
-from .constants import content
+from .constants import READING_QUIZ_COUNT, content
 import g4f as openai
 import json
 from .models import Word, ReadingQuiz, Level
-from .serializers import WordQuizesSerializer, WordSerializer, ReadingQuizSerializer
+from .serializers import (
+    ReadingQuizListSerializer,
+    WordQuizesSerializer,
+    WordSerializer,
+    ReadingQuizSerializer,
+)
 from deep_translator import (
     GoogleTranslator,
     DeeplTranslator,
 )
 
 
-# Create your views here.
-class PassageCreateView(APIView):
-    def post(self, request):
-        pass
-
-
 class ReadingView(APIView):
-    def get(self, requset, quiz_id=None):
-        pass
-
-    def post(self, request, quiz_id=None):
-        # 복습노트에 저장
+    def get(self, request, quiz_id=None):
+        # 독해문제 상세보기
         if quiz_id:
-            select = request.data.get("select")
-            user = request.user
             quiz = get_object_or_404(ReadingQuiz, pk=quiz_id)
-            if quiz not in user.reading_quizzes.all():
-                user.reading_quizzes.add(quiz, through_defaults={"select": select})
-                return Response({"detail": "저장 완료"}, status=status.HTTP_200_OK)
-            return Response({"detail": "이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST)
-        # 문장 생성
-        else:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                provider=openai.Provider.Liaobots,
-                response_format={"type": "json_object"},
-                messages=[
-                    {"role": "system", "content": content},
-                ],
-                temperature=2,
-                finish_reason="length",
-                # stream=True,
+            serializer = ReadingQuizSerializer(quiz)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        # 기존 독해문제 리스트
+        try:
+            quizzes = list(ReadingQuiz.objects.order_by("?")[:READING_QUIZ_COUNT])
+            serializer = ReadingQuizListSerializer(quizzes, many=True)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-            response = json.loads(response)
-            serializer = ReadingQuizSerializer(data=response)
-            level = Level.objects.get(name="C1")
-            if serializer.is_valid():
-                serializer.save(level=level)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # 독해문제 생성
+    def post(self, request):
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            provider=openai.Provider.Liaobots,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": content},
+            ],
+            temperature=2,
+            finish_reason="length",
+            # stream=True,
+        )
+        response = json.loads(response)
+        serializer = ReadingQuizSerializer(data=response)
+        level = Level.objects.get(step="C1")
+        if serializer.is_valid():
+            serializer.save(level=level)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
             return Response({"detail": "생성 실패"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 복습노트에서 제거
+    def delete(self, request, quiz_id):
+        user = request.user
+        quiz = get_object_or_404(ReadingQuiz, pk=quiz_id)
+        if quiz in user.reading_quizzes.all():
+            user.reading_quizzes.remove(quiz)
+            return Response({"detail": "제거 완료"}, status=status.HTTP_200_OK)
+        return Response({"detail": "이미 제거되었습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# 유저의 복습노트 관련 뷰
+class ReadingBookView(APIView):
+    def get(self, request, quiz_id=None):
+        # 복습할 독해문제 상세보기
+        if quiz_id:
+            quiz = get_object_or_404(ReadingQuiz, pk=quiz_id)
+            user = request.user
+            select = get_object_or_404(Select, user=user, reading_quiz=quiz)
+            serializer = ReadingQuizSerializer(quiz)
+            data = serializer.data
+            data["select"] = select.index
+            return Response(data, status=status.HTTP_200_OK)
+        # 복습노트의 독해문제 리스트
+        else:
+            user = request.user
+            quizzes = user.reading_quizzes.all()
+            serializer = ReadingQuizListSerializer(quizzes, many=True)
+
+    def post(self, request, quiz_id):
+        # 복습노트에 저장
+        select = request.data.get("select")
+        user = request.user
+        quiz = get_object_or_404(ReadingQuiz, pk=quiz_id)
+        if quiz not in user.reading_quizzes.all():
+            user.reading_quizzes.add(quiz, through_defaults={"select": select})
+            return Response({"detail": "저장 완료"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST)
 
     # 복습노트에서 제거
     def delete(self, request, quiz_id):
