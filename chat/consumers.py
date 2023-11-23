@@ -1,26 +1,35 @@
 import json
-from openai import OpenAI
 from asgiref.sync import sync_to_async
-from .constants import content
-from config.settings import OPENAI_API_KEY
+from .constants import CONTENT
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+from openai import AsyncOpenAI
+from config.settings import OPENAI_API_KEY
+
+client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 
 class ChatBotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.messages = [
-            {"role": "system", "content": content},
+            {
+                "role": "system",
+                "content": CONTENT,
+            },
         ]
-        bot_msg = await self.get_bot_answer(self.messages)
-        self.messages.append({"role": "assistant", "content": bot_msg})
-
         await self.accept()
+        bot_res = await self.get_bot_response(self.messages)
+        self.messages.append(
+            {
+                "role": bot_res.role,
+                "content": bot_res.content,
+            }
+        )
         await self.send(
             text_data=json.dumps(
                 {
-                    "message": bot_msg,
+                    "role": bot_res.role,
+                    "content": bot_res.content,
                 }
             )
         )
@@ -29,31 +38,38 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
         pass
 
     async def receive(self, text_data):
-        user_msg = json.loads(text_data).get("message")
-        self.messages.append({"role": "user", "content": user_msg})
-        bot_msg = await self.get_bot_answer(self.messages)
-        self.messages.append({"role": "assistant", "content": bot_msg})
+        user_res = json.loads(text_data)
+        self.messages.append(
+            {
+                "role": user_res["role"],
+                "content": user_res["content"],
+            }
+        )
+        bot_res = await self.get_bot_response(self.messages)
+        self.messages.append(
+            {
+                "role": bot_res.role,
+                "content": bot_res.content,
+            }
+        )
 
         await self.send(
             text_data=json.dumps(
                 {
-                    "message": bot_msg,
+                    "role": bot_res.role,
+                    "content": bot_res.content,
                 }
             )
         )
 
     @classmethod
-    @sync_to_async
-    def get_bot_answer(cls, messages):
-        response = client.chat.completions.create(
+    async def get_bot_response(cls, messages):
+        response = await client.chat.completions.create(
             model="gpt-3.5-turbo",
-            provider=openai.Provider.Liaobots,
             messages=messages,
-            temperature=2,
-            finish_reason="length",
-            # stream=True,
+            temperature=1.2,
         )
-        return response
+        return response.choices[0].message
 
 
 # class ChatUserConsumer(AsyncWebsocketConsumer):

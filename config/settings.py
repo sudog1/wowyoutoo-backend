@@ -56,21 +56,11 @@ INSTALLED_APPS = [
     "service",
 ]
 
-SITE_ID = 1
-
-REST_USE_JWT = True
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_EMAIL_REQUIRED = True  # email 필드 사용 o
-ACCOUNT_USERNAME_REQUIRED = False  # username 필드 사용 x
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_UNIQUE_EMAIL = True
-
-# ACCOUNT_EMAIL_VERIFICATION = "none"  # 회원가입 과정에서 이메일 인증 사용 X
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
         # ...other authentication classes...
     ),
 }
@@ -79,7 +69,6 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    # "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     # "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -270,8 +259,20 @@ CELERY_TIMEZONE = "Asia/Seoul"
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # 유저가 받은 링크를 클릭하면 회원가입 완료되게끔
 ACCOUNT_EMAIL_REQUIRED = True
 
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-# ACCOUNT_EMAIL_VERIFICATION = "none"
+SITE_ID = 1
+
+REST_USE_JWT = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True  # email 필드 사용 o
+ACCOUNT_USERNAME_REQUIRED = False  # username 필드 사용 x
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_UNIQUE_EMAIL = True
+
+# 이메일 인증 사용
+# ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+
+# 이메일 인증 사용하지 않음
+ACCOUNT_EMAIL_VERIFICATION = "none"
 
 EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = (
     "/"  # 사이트와 관련한 자동응답을 받을 이메일 주소,'webmaster@localhost'
