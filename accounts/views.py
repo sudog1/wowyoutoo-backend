@@ -207,21 +207,13 @@ class KakaoLogin(APIView):
         user_email = kakao_account.get("email")
         user_nickname = kakao_account.get("profile")["nickname"]
         user_img = kakao_account.get("profile")["profile_image_url"]
-        # print(user_email, user_nickname, user_img)
-
+        
         try:
             # 기존에 가입된 유저나 소셜 로그인 유저가 존재하면 로그인
             user = User.objects.get(email=user_email)
             social_user = SocialAccount.objects.filter(
                 uid=user_email).first()
-            # print(social_user.provider)
-
-            # # 소셜 로그인 사용자의 경우
-            # if social_user:
-            #     # 사용자의 비밀번호 없이 로그인 가능한 JWT 토큰 생성
-            #     refresh = RefreshToken.for_user(user)
-            #     return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
-
+            
             # 동일한 이메일의 유저가 있지만, 소셜 계정이 아닐 때
             if social_user is None:
                 return Response({"error": "소셜 계정이 아닌 이미 존재하는 이메일입니다."}, status=status.HTTP_400_BAD_REQUEST)
