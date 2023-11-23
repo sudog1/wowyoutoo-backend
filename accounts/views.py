@@ -28,6 +28,7 @@ import json
 from dj_rest_auth.registration.views import RegisterView
 from django.contrib.auth import login
 from allauth.account.models import EmailConfirmation
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class ProfileView(APIView):
@@ -42,14 +43,13 @@ class ProfileView(APIView):
     def put(self, request, user_id):
         print(request.FILES)
         user = get_object_or_404(User, id=user_id)
-        # kakao_account = user_data.get('kakao_account')
-
+        social_user = get_object_or_404(SocialAccount)  # allauth의 소셜어카운트 모델
         if request.user == user:
-            # if kakao_account:  # 만약 사용자가 카카오 로그인 사용자라면, 비밀번호 관련 수정을 거부합니다.
-            #     return Response(
-            #         {"message": "카카오 로그인 사용자는 비밀번호 변경이 불가능합니다."},
-            #         status=status.HTTP_403_FORBIDDEN,
-            #     )
+            if social_user:  # 소셜 계정일경우, 에러 메세지
+                return Response(
+                    {"message": "소셜 로그인 사용자는 변경이 불가능합니다."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
             if "present_pw" in request.data:  # 비밀번호 변경할 때
                 # 현재 비밀번호가 일치하는지 확인.
@@ -79,7 +79,15 @@ class ProfileView(APIView):
                     )
 
             else:  # 비밀번호 변경안하면 프로필 필드 업데이트 진행
-                serializer = ProfileSerializer(user, data=request.data, partial=True)
+                serializer = ProfileSerializer(
+                    user, data=request.data, partial=True)
+
+                if social_user:  # 여기도 소셜 유저일경우 에러 메세지
+                    return Response(
+                        {"message": "소셜 로그인 사용자는 변경이 불가능합니다."},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+
                 if serializer.is_valid():
                     serializer.save()
                     print(serializer.data)
@@ -179,7 +187,9 @@ class KakaoLogin(APIView):
                 "code": code_value,
             },
         )
-        print(kakao_token.json()["access_token"])  # access_token 발급 완료
+        print(kakao_token.json)  # access_token 발급 완료
+        print("####")
+
         access_token = kakao_token.json()["access_token"]
         refresh_token = kakao_token.json()["refresh_token"]
 
@@ -199,29 +209,44 @@ class KakaoLogin(APIView):
         user_img = kakao_account.get("profile")["profile_image_url"]
         # print(user_email, user_nickname, user_img)
 
-        # 유저의 이메일이 존재하지 않으면 저장 / 존재하면 오류 출력
         try:
+            # 기존에 가입된 유저나 소셜 로그인 유저가 존재하면 로그인
             user = User.objects.get(email=user_email)
-            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-            print(user.nickname, user.email, "password", user.password)
+            social_user = SocialAccount.objects.filter(
+                email=user_email).first()
 
-            token_data["user_profile"] = {"uid": user.id, "email": user.email}
-            return Response(data=token_data, status=status.HTTP_200_OK)
+            # 소셜 로그인 사용자의 경우
+            if social_user:
+                # 사용자의 비밀번호 없이 로그인 가능한 JWT 토큰 생성
+                refresh = RefreshToken.for_user(user)
+                return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
+
+            # 동일한 이메일의 유저가 있지만, 소셜 계정이 아닐 때
+            if social_user is None:
+                return Response({"error": "소셜 계정이 아닌 이미 존재하는 이메일입니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 소셜 계정이 카카오가 아닌 다른 소셜 계정으로 가입했을 때
+            if social_user.provider != "kakao":
+                return Response({"error": "다른 소셜 계정으로 가입되어 있습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
         except User.DoesNotExist:
-            user = User.objects.create(
+            # 기존에 가입된 유저가 없으면 새로 가입
+            new_user = User.objects.create(
                 email=user_email,
                 nickname=user_nickname,
                 profile_img=user_img,
             )
-            user.set_unusable_password()
-            user.save()
-            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-            print(user.nickname, user.email, "password", user.password)
 
-            token_data["user_profile"] = {"uid": user.id, "email": user.email}
-            return Response(data=token_data, status=status.HTTP_200_OK)
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            # 소셜 계정도 생성
+            SocialAccount.objects.create(
+                user_id=new_user.id,
+                uid=new_user.email,
+                provider="kakao",
+            )
+
+            # 새로운 사용자에 대한 JWT 토큰 생성
+            refresh = RefreshToken.for_user(new_user)
+            return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "회원가입 성공"}, status=status.HTTP_201_CREATED)
 
 
 class GithubLogin(APIView):
@@ -260,7 +285,6 @@ class GithubLogin(APIView):
         )
 
         user_data = user_data.json()
-        print(user_data)
 
         """유저 이메일"""
         user_emails = requests.get(
@@ -271,25 +295,35 @@ class GithubLogin(APIView):
             },
         )
         user_emails = user_emails.json()
-        print(user_emails)
+
         try:
             user = User.objects.get(email=user_emails[0]["email"])
-            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+            social_user = SocialAccount.objects.filter(
+                email=user_emails).first()
 
-            token_data["user_profile"] = {"uid": user.id, "email": user.email}
-            return Response(data=token_data, status=status.HTTP_200_OK)
+            if social_user:
+                refresh = RefreshToken.for_user(user)
+
+                return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
+
+            if social_user is None:
+                return Response({"error": "소셜 계정이 아닌 이미 존재하는 이메일입니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+            if social_user.provider != "github":
+                return Response({"error": "다른 소셜 계정으로 가입되어 있습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
         except User.DoesNotExist:
-            user = User.objects.create(
+            new_user = User.objects.create(
                 nickname=user_data.get("login"),
                 email=user_emails[0]["email"],
-                profile_img=user_data.get("avatar_url"),
+                profile_img=user_data.get("avatar_url")
             )
-            user.set_unusable_password()  # password 없음
-            user.save()
-            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-            print(user.nickname, user.email, "password", user.password)
+            SocialAccount.objects.create(
+                user_id=new_user.id,
+                uid=new_user.email,
+                provider="github",
+            )
 
-            token_data["user_profile"] = {"uid": user.id, "email": user.email}
-            return Response(data=token_data, status=status.HTTP_200_OK)
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            refresh = RefreshToken.for_user(new_user)
+
+            return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "회원가입 성공"}, status=status.HTTP_201_CREATED)
