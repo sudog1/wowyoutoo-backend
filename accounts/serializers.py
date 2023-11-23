@@ -15,8 +15,8 @@ from django.db import transaction
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    # readings_num = serializers.StringRelatedField(many=True)
-    # words_num = serializers.StringRelatedField(many=True)
+    reading_nums = serializers.IntegerField()
+    word_nums = serializers.IntegerField()
 
     class Meta:
         model = User
@@ -25,6 +25,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "email",
             "profile_img",
             "created_at",
+            "reading_nums",
+            "word_nums",
         )
 
 
