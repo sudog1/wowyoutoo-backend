@@ -11,6 +11,8 @@ from .constants import (
     WRONG_WORDS_PER_QUIZ,
 )
 import json
+
+# from config.settings import OPENAI_API_KEY
 from .models import Word, ReadingQuiz, Level
 from .serializers import (
     MyWordSerializer,
