@@ -4,7 +4,11 @@ from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from accounts.models import User
 from rest_framework_simplejwt.views import TokenObtainPairView
-from accounts.serializers import CustomTokenObtainPairSerializer, CustomRegisterSerializer, ProfileSerializer
+from accounts.serializers import (
+    CustomTokenObtainPairSerializer,
+    CustomRegisterSerializer,
+    ProfileSerializer,
+)
 from rest_framework.permissions import AllowAny
 from django.shortcuts import redirect
 from json import JSONDecodeError
@@ -53,7 +57,9 @@ class ProfileView(APIView):
                     # 새로 입력한 비밀번호와 비밀번호 확인이 일치하는지 확인.
                     if request.data["password"] == request.data["password_check"]:
                         serializer = ProfileSerializer(
-                            user, data=request.data, partial=True  # partial은 전달된 필드 데이터만 부분적으로 사용가능
+                            user,
+                            data=request.data,
+                            partial=True,  # partial은 전달된 필드 데이터만 부분적으로 사용가능
                         )
                         if serializer.is_valid():
                             serializer.save()
@@ -73,8 +79,7 @@ class ProfileView(APIView):
                     )
 
             else:  # 비밀번호 변경안하면 프로필 필드 업데이트 진행
-                serializer = ProfileSerializer(
-                    user, data=request.data, partial=True)
+                serializer = ProfileSerializer(user, data=request.data, partial=True)
                 if serializer.is_valid():
                     serializer.save()
                     print(serializer.data)
@@ -157,11 +162,10 @@ class Token_Test(APIView):
 
 class KakaoLogin(APIView):
     def post(self, request):
-
         state = os.environ.get("STATE")
         client_id = os.environ.get("KAKAO_REST_API_KEY")
 
-        received_code = request.data.get('code')  # 받은 ?code='' 값
+        received_code = request.data.get("code")  # 받은 ?code='' 값
         code_value = received_code.split("?code=")[-1]  # 코드 값만 추출
         print(code_value)
 
@@ -172,14 +176,14 @@ class KakaoLogin(APIView):
                 "grant_type": "authorization_code",
                 "client_id": client_id,
                 "redirect_uri": "http://127.0.0.1:5500/templates/redirect.html",
-                "code": code_value
+                "code": code_value,
             },
         )
-        print(kakao_token.json()['access_token'])  # access_token 발급 완료
-        access_token = kakao_token.json()['access_token']
-        refresh_token = kakao_token.json()['refresh_token']
+        print(kakao_token.json()["access_token"])  # access_token 발급 완료
+        access_token = kakao_token.json()["access_token"]
+        refresh_token = kakao_token.json()["refresh_token"]
 
-        token_data = {'access': access_token, 'refresh': refresh_token}
+        token_data = {"access": access_token, "refresh": refresh_token}
         # access_token 으로 사용자 정보 가져오기
         user_data = requests.get(
             "https://kapi.kakao.com/v2/user/me",
@@ -189,19 +193,19 @@ class KakaoLogin(APIView):
         # print(user_data.json())
         user_data = user_data.json()
 
-        kakao_account = user_data.get('kakao_account')
-        user_email = kakao_account.get('email')
-        user_nickname = kakao_account.get('profile')['nickname']
-        user_img = kakao_account.get('profile')['profile_image_url']
+        kakao_account = user_data.get("kakao_account")
+        user_email = kakao_account.get("email")
+        user_nickname = kakao_account.get("profile")["nickname"]
+        user_img = kakao_account.get("profile")["profile_image_url"]
         # print(user_email, user_nickname, user_img)
 
         # 유저의 이메일이 존재하지 않으면 저장 / 존재하면 오류 출력
         try:
             user = User.objects.get(email=user_email)
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
             print(user.nickname, user.email, "password", user.password)
 
-            token_data['user_profile'] = {'uid': user.id, 'email': user.email}
+            token_data["user_profile"] = {"uid": user.id, "email": user.email}
             return Response(data=token_data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             user = User.objects.create(
@@ -211,10 +215,10 @@ class KakaoLogin(APIView):
             )
             user.set_unusable_password()
             user.save()
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
             print(user.nickname, user.email, "password", user.password)
 
-            token_data['user_profile'] = {'uid': user.id, 'email': user.email}
+            token_data["user_profile"] = {"uid": user.id, "email": user.email}
             return Response(data=token_data, status=status.HTTP_200_OK)
         except Exception:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -222,18 +226,17 @@ class KakaoLogin(APIView):
 
 class GithubLogin(APIView):
     def post(self, request):
-
         state = os.environ.get("STATE")
         client_id = os.environ.get("SOCIAL_AUTH_GITHUB_CLIENT_ID")
         client_secret = os.environ.get("SOCIAL_AUTH_GITHUB_SECRET")
 
-        received_code = request.data.get('code')
+        received_code = request.data.get("code")
         code_value = received_code.split("?code=")[-1]
 
         """토큰"""
         github_token = requests.post(
             f"https://github.com/login/oauth/access_token",
-            headers={'Accept': 'application/json'},
+            headers={"Accept": "application/json"},
             data={
                 "client_id": client_id,
                 "client_secret": client_secret,
@@ -242,11 +245,10 @@ class GithubLogin(APIView):
             },
         )
 
-        print(github_token.json()['access_token'])
-        access_token = github_token.json()['access_token']
-        refresh_token = github_token.json()['refresh_token']
+        print(github_token.json()["access_token"])
+        access_token = github_token.json()["access_token"]
 
-        token_data = {'access': access_token, 'refresh': refresh_token}
+        token_data = {"access": access_token, "auth": "github"}
 
         """유저 데이터"""
         user_data = requests.get(
@@ -272,9 +274,9 @@ class GithubLogin(APIView):
         print(user_emails)
         try:
             user = User.objects.get(email=user_emails[0]["email"])
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
 
-            token_data['user_profile'] = {'uid': user.id, 'email': user.email}
+            token_data["user_profile"] = {"uid": user.id, "email": user.email}
             return Response(data=token_data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             user = User.objects.create(
@@ -282,12 +284,12 @@ class GithubLogin(APIView):
                 email=user_emails[0]["email"],
                 profile_img=user_data.get("avatar_url"),
             )
-            user.set_unusable_password()    # password 없음
+            user.set_unusable_password()  # password 없음
             user.save()
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
             print(user.nickname, user.email, "password", user.password)
 
-            token_data['user_profile'] = {'uid': user.id, 'email': user.email}
+            token_data["user_profile"] = {"uid": user.id, "email": user.email}
             return Response(data=token_data, status=status.HTTP_200_OK)
         except Exception:
             return Response(status=status.HTTP_400_BAD_REQUEST)
