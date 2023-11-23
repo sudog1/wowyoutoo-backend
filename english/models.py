@@ -44,7 +44,7 @@ class Select(models.Model):
 
 
 class Word(models.Model):
-    content = models.CharField(max_length=30)
+    term = models.CharField(max_length=30)
     meaning = models.CharField(max_length=30)
     users = models.ManyToManyField(AUTH_USER_MODEL, related_name="words")
 

@@ -181,7 +181,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "/static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -268,8 +267,11 @@ ACCOUNT_USERNAME_REQUIRED = False  # username 필드 사용 x
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_UNIQUE_EMAIL = True
 
-# ACCOUNT_EMAIL_VERIFICATION = "mandatory" # 이메일 인증 사용
-ACCOUNT_EMAIL_VERIFICATION = "none"  # 이메일 인증 사용하지 않음
+# 이메일 인증 사용
+# ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+
+# 이메일 인증 사용하지 않음
+ACCOUNT_EMAIL_VERIFICATION = "none"
 
 EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = (
     "/"  # 사이트와 관련한 자동응답을 받을 이메일 주소,'webmaster@localhost'
