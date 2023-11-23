@@ -1,4 +1,4 @@
-content = """
+CONTENT = """
     Your role is to generate english reading comprehension test.
     Be as imaginative as possible.
     Test should be at the C1 level.
@@ -15,3 +15,8 @@ content = """
     - "solution": <zero-based index of correct answer>
     - "explanation": <explanation>
 """
+
+READING_QUIZ_COUNT = 10
+
+CORRECT_WORDS_COUNT = 10
+WRONG_WORDS_PER_QUIZ = 3

@@ -6,18 +6,17 @@ class WordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
         fields = (
-            "content",
+            "id",
+            "term",
             "meaning",
         )
 
 
 class MyWordSerializer(serializers.ModelSerializer):
-    word = serializers.CharField(source="content")
-
     class Meta:
         model = Word
         fields = (
-            "word",
+            "term",
             "meaning",
         )
 
@@ -30,9 +29,18 @@ class WordQuizesSerializer(serializers.Serializer):
     class Meta:
         model = Word
         fields = (
-            "word",
+            "term",
             "meaning",
             "wrong",
+        )
+
+
+class ReadingQuizListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReadingQuiz
+        fields = (
+            "id",
+            "title",
         )
 
 
@@ -40,6 +48,7 @@ class ReadingQuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReadingQuiz
         fields = (
+            "id",
             "title",
             "paragraph",
             "question",

@@ -52,6 +52,8 @@ filelock==3.13.1
 Flask==3.0.0
 frozenlist==1.4.0
 g4f==0.1.8.8
+gevent==23.9.1
+greenlet==3.0.1
 h11==0.14.0
 h2==4.1.0
 hpack==4.0.0
@@ -139,4 +141,5 @@ Werkzeug==3.0.1
 win32-setctime==1.1.0
 wsproto==1.2.0
 yarl==1.9.2
+zope.event==5.0
 zope.interface==6.1
