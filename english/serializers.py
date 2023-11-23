@@ -1,28 +1,58 @@
 from rest_framework import serializers
-from english.models import Word
+from .models import Word, ReadingQuiz
 
 
 class WordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
-        fields = ("content", "meaning",)
-        
-        
-class MyWordSerializer(serializers.ModelSerializer):
-    word = serializers.CharField(source='content')
+        fields = (
+            "id",
+            "term",
+            "meaning",
+        )
 
+
+class MyWordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
-        fields = ("word", "meaning",)
+        fields = (
+            "term",
+            "meaning",
+        )
 
 
 class WordQuizesSerializer(serializers.Serializer):
     word = serializers.CharField(max_length=20)
     meaning = serializers.CharField(max_length=20)
     wrong = serializers.ListField(child=serializers.CharField(max_length=100))
-    
+
     class Meta:
         model = Word
         fields = (
-            "word", "meaning", "wrong",
+            "term",
+            "meaning",
+            "wrong",
+        )
+
+
+class ReadingQuizListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReadingQuiz
+        fields = (
+            "id",
+            "title",
+        )
+
+
+class ReadingQuizSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReadingQuiz
+        fields = (
+            "id",
+            "title",
+            "paragraph",
+            "question",
+            "answers",
+            "solution",
+            "explanation",
         )
