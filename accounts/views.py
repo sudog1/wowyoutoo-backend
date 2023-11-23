@@ -183,7 +183,7 @@ class KakaoLogin(APIView):
             data={
                 "grant_type": "authorization_code",
                 "client_id": client_id,
-                "redirect_uri": "http://127.0.0.1:5500/templates/redirect.html",
+                "redirect_uri": "http://127.0.0.1:5501/templates/redirect.html",
                 "code": code_value,
             },
         )
@@ -213,7 +213,7 @@ class KakaoLogin(APIView):
             # 기존에 가입된 유저나 소셜 로그인 유저가 존재하면 로그인
             user = User.objects.get(email=user_email)
             social_user = SocialAccount.objects.filter(
-                email=user_email).first()
+                user__email=user_email).first()
 
             # 소셜 로그인 사용자의 경우
             if social_user:
@@ -265,7 +265,7 @@ class GithubLogin(APIView):
             data={
                 "client_id": client_id,
                 "client_secret": client_secret,
-                "redirect_url": "http://127.0.0.1:5500/templates/redirect.html",
+                "redirect_url": "http://127.0.0.1:5501/templates/redirect.html",
                 "code": code_value,
             },
         )
@@ -299,7 +299,7 @@ class GithubLogin(APIView):
         try:
             user = User.objects.get(email=user_emails[0]["email"])
             social_user = SocialAccount.objects.filter(
-                email=user_emails).first()
+                user__email=user_emails[0]["email"]).first()
 
             if social_user:
                 refresh = RefreshToken.for_user(user)
