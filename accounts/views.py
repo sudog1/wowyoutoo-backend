@@ -220,7 +220,7 @@ class KakaoLogin(APIView):
 
             # 소셜 계정이 카카오가 아닌 다른 소셜 계정으로 가입했을 때
             if social_user.provider != "kakao":
-                print("not kakao")
+                
                 return Response({"error": "다른 소셜 계정으로 가입되어 있습니다."}, status=status.HTTP_400_BAD_REQUEST)
             
             # 소셜 로그인 사용자의 경우
