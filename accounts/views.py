@@ -213,13 +213,14 @@ class KakaoLogin(APIView):
             # 기존에 가입된 유저나 소셜 로그인 유저가 존재하면 로그인
             user = User.objects.get(email=user_email)
             social_user = SocialAccount.objects.filter(
-                email=user_email).first()
+                uid=user_email).first()
+            # print(social_user.provider)
 
-            # 소셜 로그인 사용자의 경우
-            if social_user:
-                # 사용자의 비밀번호 없이 로그인 가능한 JWT 토큰 생성
-                refresh = RefreshToken.for_user(user)
-                return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
+            # # 소셜 로그인 사용자의 경우
+            # if social_user:
+            #     # 사용자의 비밀번호 없이 로그인 가능한 JWT 토큰 생성
+            #     refresh = RefreshToken.for_user(user)
+            #     return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
 
             # 동일한 이메일의 유저가 있지만, 소셜 계정이 아닐 때
             if social_user is None:
@@ -227,7 +228,14 @@ class KakaoLogin(APIView):
 
             # 소셜 계정이 카카오가 아닌 다른 소셜 계정으로 가입했을 때
             if social_user.provider != "kakao":
+                print("not kakao")
                 return Response({"error": "다른 소셜 계정으로 가입되어 있습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 소셜 로그인 사용자의 경우
+            if social_user:
+                # 사용자의 비밀번호 없이 로그인 가능한 JWT 토큰 생성
+                refresh = RefreshToken.for_user(user)
+                return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
             # 기존에 가입된 유저가 없으면 새로 가입
@@ -285,6 +293,7 @@ class GithubLogin(APIView):
         )
 
         user_data = user_data.json()
+        # print(user_data)
 
         """유저 이메일"""
         user_emails = requests.get(
@@ -295,22 +304,31 @@ class GithubLogin(APIView):
             },
         )
         user_emails = user_emails.json()
+        # print(user_emails)
 
         try:
             user = User.objects.get(email=user_emails[0]["email"])
+            print(user)
             social_user = SocialAccount.objects.filter(
-                email=user_emails).first()
+                uid=user_emails[0]["email"]).first()
+            print(social_user)
 
-            if social_user:
-                refresh = RefreshToken.for_user(user)
+            # if social_user:
+            #     refresh = RefreshToken.for_user(user)
 
-                return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
+            #     return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
 
             if social_user is None:
+                
                 return Response({"error": "소셜 계정이 아닌 이미 존재하는 이메일입니다."}, status=status.HTTP_400_BAD_REQUEST)
 
             if social_user.provider != "github":
                 return Response({"error": "다른 소셜 계정으로 가입되어 있습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if social_user:
+                refresh = RefreshToken.for_user(user)
+
+                return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
             new_user = User.objects.create(
