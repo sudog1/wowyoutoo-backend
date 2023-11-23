@@ -60,6 +60,7 @@ class WordView(APIView):
                 wrong_words = remain_words[index * self.WRONG_WORDS_PER_QUIZ:(index + 1) * self.WRONG_WORDS_PER_QUIZ]
 
                 quiz = {
+                    "id":correct_word.id,
                     "word": correct_word.content,
                     "meaning": correct_word.meaning,
                     "wrong": [word.meaning for word in wrong_words]
