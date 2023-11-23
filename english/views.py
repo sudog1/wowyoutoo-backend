@@ -4,8 +4,13 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import ReadingQuiz, Select
 from rest_framework import status
-from .constants import READING_QUIZ_COUNT, content
-import g4f as openai
+from .constants import (
+    CONTENT,
+    READING_QUIZ_COUNT,
+    CORRECT_WORDS_COUNT,
+    WRONG_WORDS_PER_QUIZ,
+)
+
 import json
 from .models import Word, ReadingQuiz, Level
 from .serializers import (
@@ -19,6 +24,11 @@ from deep_translator import (
     GoogleTranslator,
     DeeplTranslator,
 )
+
+from openai import OpenAI
+from config.settings import OPENAI_API_KEY
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 class ReadingView(APIView):
@@ -39,20 +49,18 @@ class ReadingView(APIView):
 
     # 독해문제 생성
     def post(self, request):
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            provider=openai.Provider.Liaobots,
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-1106",
             response_format={"type": "json_object"},
             messages=[
-                {"role": "system", "content": content},
+                {"role": "system", "content": CONTENT},
             ],
-            temperature=2,
-            finish_reason="length",
-            # stream=True,
+            temperature=1.5,
+            max_tokens=500,
         )
-        response = json.loads(response)
-        serializer = ReadingQuizSerializer(data=response)
-        level = Level.objects.get(step="C1")
+        data = json.loads(response.choices[0].message.content)
+        serializer = ReadingQuizSerializer(data=data)
+        level = Level.objects.get(step="B1")
         if serializer.is_valid():
             serializer.save(level=level)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

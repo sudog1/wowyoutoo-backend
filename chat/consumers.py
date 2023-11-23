@@ -1,14 +1,21 @@
 import json
-import g4f as openai
 from asgiref.sync import sync_to_async
-from .constants import content
+from .constants import CONTENT
 from channels.generic.websocket import AsyncWebsocketConsumer
+
+from openai import OpenAI
+from config.settings import OPENAI_API_KEY
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 class ChatBotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        # if not self.scope["user"].is_authenticated:
+        #     await self.close()
+        #     return
         self.messages = [
-            {"role": "system", "content": content},
+            {"role": "system", "content": CONTENT},
         ]
         bot_msg = await self.get_bot_answer(self.messages)
         self.messages.append({"role": "assistant", "content": bot_msg})
