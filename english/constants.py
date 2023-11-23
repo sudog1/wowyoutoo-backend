@@ -1,4 +1,4 @@
-content = """
+CONTENT = """
     Your role is to generate english reading comprehension test.
     Be as imaginative as possible.
     Test should be at the C1 level.

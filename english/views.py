@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from .models import ReadingQuiz, Select
 from rest_framework import status
 from .constants import (
-    content,
+    CONTENT,
     READING_QUIZ_COUNT,
     CORRECT_WORDS_COUNT,
     WRONG_WORDS_PER_QUIZ,
@@ -50,7 +50,7 @@ class ReadingView(APIView):
             provider=openai.Provider.Liaobots,
             response_format={"type": "json_object"},
             messages=[
-                {"role": "system", "content": content},
+                {"role": "system", "content": CONTENT},
             ],
             temperature=2,
             finish_reason="length",
