@@ -139,6 +139,7 @@ class WordView(APIView):
                 ]
 
                 quiz = {
+                    "id":correct_word.id,
                     "term": correct_word.term,
                     "meaning": correct_word.meaning,
                     "wrong": [word.meaning for word in wrong_words],
