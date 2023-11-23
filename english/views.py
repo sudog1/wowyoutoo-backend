@@ -45,6 +45,7 @@ class ReadingView(APIView):
 
     # 독해문제 생성
     def post(self, request):
+        
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             provider=openai.Provider.Liaobots,
@@ -56,6 +57,7 @@ class ReadingView(APIView):
             finish_reason="length",
             # stream=True,
         )
+        
         response = json.loads(response)
         serializer = ReadingQuizSerializer(data=response)
         level = Level.objects.get(step="C1")
@@ -139,6 +141,7 @@ class WordView(APIView):
                 ]
 
                 quiz = {
+                    "id":correct_word.id,
                     "term": correct_word.term,
                     "meaning": correct_word.meaning,
                     "wrong": [word.meaning for word in wrong_words],
@@ -191,7 +194,7 @@ class WordsBookView(APIView):
         words = user.words.all()
         word = get_object_or_404(Word, pk=word_id)
         if word not in words:
-            words.add(word)
+            user.words.add(word)
             return Response(
                 {"message": "내 단어장에 단어가 추가되었습니다."}, status=status.HTTP_200_OK
             )
