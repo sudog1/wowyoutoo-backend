@@ -29,6 +29,7 @@ from dj_rest_auth.registration.views import RegisterView
 from django.contrib.auth import login
 from allauth.account.models import EmailConfirmation
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.hashers import check_password
 
 
 class ProfileView(APIView):
@@ -41,18 +42,27 @@ class ProfileView(APIView):
             return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
 
     def put(self, request, user_id):
-        print(request.FILES)
+        # print(request.data)
+        
         user = get_object_or_404(User, id=user_id)
-        social_user = SocialAccount.objects.filter(
-            user=user)  # allauth의 소셜어카운트 모델
+
+        user_email = user.email
+        
+        try:
+            social_user = get_object_or_404(SocialAccount, uid=user_email)  # allauth의 소셜어카운트 모델
+        except:
+            social_user = None
+
+
         if request.user == user:
             if social_user:  # 소셜 계정일경우, 에러 메세지
+                
                 return Response(
                     {"message": "소셜 로그인 사용자는 변경이 불가능합니다."},
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
-            if "present_pw" in request.data:  # 비밀번호 변경할 때
+            if request.data['present_pw']:  # 비밀번호 변경할 때
                 # 현재 비밀번호가 일치하는지 확인.
                 if check_password(request.data["present_pw"], user.password) == True:
                     # 새로 입력한 비밀번호와 비밀번호 확인이 일치하는지 확인.
@@ -70,20 +80,24 @@ class ProfileView(APIView):
                                 serializer.errors, status=status.HTTP_400_BAD_REQUEST
                             )
                     else:
+                        
                         return Response(
                             {"message": "비밀번호가 일치하지 않습니다. 다시 입력하세요."},
                             status=status.HTTP_403_FORBIDDEN,
                         )
                 else:
+                    
                     return Response(
                         {"message": "현재 비밀번호를 확인하세요."}, status=status.HTTP_403_FORBIDDEN
                     )
 
             else:  # 비밀번호 변경안하면 프로필 필드 업데이트 진행
+                 
                 serializer = ProfileSerializer(
                     user, data=request.data, partial=True)
 
                 if social_user:  # 여기도 소셜 유저일경우 에러 메세지
+                    
                     return Response(
                         {"message": "소셜 로그인 사용자는 변경이 불가능합니다."},
                         status=status.HTTP_403_FORBIDDEN,
@@ -98,12 +112,13 @@ class ProfileView(APIView):
                         serializer.errors, status=status.HTTP_400_BAD_REQUEST
                     )
         else:
+            
             return Response({"message": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
 
 
 class HomeView(APIView):
     def get(self, key):
-        return redirect("http://127.0.0.1:5500/login.html")
+        return redirect("http://127.0.0.1:5500/templates/login.html")
 
 
 # dj-rest-auth 이메일 인증 로직
@@ -208,20 +223,14 @@ class KakaoLogin(APIView):
         user_email = kakao_account.get("email")
         user_nickname = kakao_account.get("profile")["nickname"]
         user_img = kakao_account.get("profile")["profile_image_url"]
-        # print(user_email, user_nickname, user_img)
-
+        
         try:
             # 기존에 가입된 유저나 소셜 로그인 유저가 존재하면 로그인
             user = User.objects.get(email=user_email)
             social_user = SocialAccount.objects.filter(
-                user__email=user_email).first()  # 소셜어카운트 모델에는 email field가 없음, User 모델 간에 외래 키 관계가 있다고함 그래서 user__넣음
 
-            # 소셜 로그인 사용자의 경우
-            if social_user:
-                # 사용자의 비밀번호 없이 로그인 가능한 JWT 토큰 생성
-                refresh = RefreshToken.for_user(user)
-                # 리프레시 토큰/ 액세스 토큰을 문자열로 변환하여 JSON 형식으로 응답 데이터에 포함시켜 프론트에게 전달
-                return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
+                uid=user_email).first()
+            
 
             # 동일한 이메일의 유저가 있지만, 소셜 계정이 아닐 때
             if social_user is None:
@@ -229,7 +238,14 @@ class KakaoLogin(APIView):
 
             # 소셜 계정이 카카오가 아닌 다른 소셜 계정으로 가입했을 때
             if social_user.provider != "kakao":
+                
                 return Response({"error": "다른 소셜 계정으로 가입되어 있습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 소셜 로그인 사용자의 경우
+            if social_user:
+                # 사용자의 비밀번호 없이 로그인 가능한 JWT 토큰 생성
+                refresh = RefreshToken.for_user(user)
+                return Response({'refresh': str(refresh), 'access': str(refresh.access_token), 'provider': social_user.provider, "msg": "로그인 성공"}, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
             # 기존에 가입된 유저가 없으면 유저 모델에 생성후 소셜어카운트에 포함시키는 로직
@@ -248,8 +264,9 @@ class KakaoLogin(APIView):
 
             # 새로운 사용자에 대한 JWT 토큰 생성
             refresh = RefreshToken.for_user(new_user)
-            # 리프레시 토큰/ 액세스 토큰을 문자열로 변환하여 JSON 형식으로 응답 데이터에 포함시켜 프론트에게 전달
-            return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "회원가입 성공"}, status=status.HTTP_201_CREATED)
+
+            return Response({'refresh': str(refresh), 'access': str(refresh.access_token), 'provider': social_user.provider, "msg": "회원가입 성공"}, status=status.HTTP_201_CREATED)
+
 
 
 class GithubLogin(APIView):
@@ -288,6 +305,7 @@ class GithubLogin(APIView):
         )
 
         user_data = user_data.json()
+        # print(user_data)
 
         """유저 이메일"""
         user_emails = requests.get(
@@ -298,22 +316,32 @@ class GithubLogin(APIView):
             },
         )
         user_emails = user_emails.json()
+        # print(user_emails)
 
         try:
             user = User.objects.get(email=user_emails[0]["email"])
+            print(user)
             social_user = SocialAccount.objects.filter(
-                user__email=user_emails[0]["email"]).first()
 
-            if social_user:
-                refresh = RefreshToken.for_user(user)
+                uid=user_emails[0]["email"]).first()
+            
+            # if social_user:
+            #     refresh = RefreshToken.for_user(user)
 
-                return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
+
+            #     return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
 
             if social_user is None:
+                
                 return Response({"error": "소셜 계정이 아닌 이미 존재하는 이메일입니다."}, status=status.HTTP_400_BAD_REQUEST)
 
             if social_user.provider != "github":
                 return Response({"error": "다른 소셜 계정으로 가입되어 있습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if social_user:
+                refresh = RefreshToken.for_user(user)
+
+                return Response({'refresh': str(refresh), 'access': str(refresh.access_token), 'provider': social_user.provider, "msg": "로그인 성공"}, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
             new_user = User.objects.create(
@@ -329,4 +357,4 @@ class GithubLogin(APIView):
 
             refresh = RefreshToken.for_user(new_user)
 
-            return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "회원가입 성공"}, status=status.HTTP_201_CREATED)
+            return Response({'refresh': str(refresh), 'access': str(refresh.access_token), 'provider': social_user.provider,"msg": "회원가입 성공"}, status=status.HTTP_201_CREATED)

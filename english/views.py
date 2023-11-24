@@ -50,8 +50,10 @@ class ReadingView(APIView):
 
     # 독해문제 생성
     def post(self, request):
+
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
+
             response_format={"type": "json_object"},
             messages=[
                 {"role": "system", "content": CONTENT},
@@ -59,9 +61,11 @@ class ReadingView(APIView):
             temperature=1.5,
             max_tokens=500,
         )
+
         data = json.loads(response.choices[0].message.content)
         serializer = ReadingQuizSerializer(data=data)
         level = Level.objects.get(step="B1")
+
         if serializer.is_valid():
             serializer.save(level=level)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -142,7 +146,9 @@ class WordView(APIView):
                 ]
 
                 quiz = {
+
                     "id": correct_word.id,
+
                     "term": correct_word.term,
                     "meaning": correct_word.meaning,
                     "wrong": [word.meaning for word in wrong_words],
@@ -201,7 +207,7 @@ class WordsBookView(APIView):
         words = user.words.all()
         word = get_object_or_404(Word, pk=word_id)
         if word not in words:
-            words.add(word)
+            user.words.add(word)
             return Response(
                 {"message": "내 단어장에 단어가 추가되었습니다."}, status=status.HTTP_200_OK
             )
