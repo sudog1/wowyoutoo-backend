@@ -43,7 +43,8 @@ class ProfileView(APIView):
     def put(self, request, user_id):
         print(request.FILES)
         user = get_object_or_404(User, id=user_id)
-        social_user = get_object_or_404(SocialAccount)  # allauth의 소셜어카운트 모델
+        social_user = SocialAccount.objects.filter(
+            user=user)  # allauth의 소셜어카운트 모델
         if request.user == user:
             if social_user:  # 소셜 계정일경우, 에러 메세지
                 return Response(
@@ -213,12 +214,13 @@ class KakaoLogin(APIView):
             # 기존에 가입된 유저나 소셜 로그인 유저가 존재하면 로그인
             user = User.objects.get(email=user_email)
             social_user = SocialAccount.objects.filter(
-                user__email=user_email).first()
+                user__email=user_email).first()  # 소셜어카운트 모델에는 email field가 없음, User 모델 간에 외래 키 관계가 있다고함 그래서 user__넣음
 
             # 소셜 로그인 사용자의 경우
             if social_user:
                 # 사용자의 비밀번호 없이 로그인 가능한 JWT 토큰 생성
                 refresh = RefreshToken.for_user(user)
+                # 리프레시 토큰/ 액세스 토큰을 문자열로 변환하여 JSON 형식으로 응답 데이터에 포함시켜 프론트에게 전달
                 return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
 
             # 동일한 이메일의 유저가 있지만, 소셜 계정이 아닐 때
@@ -230,14 +232,14 @@ class KakaoLogin(APIView):
                 return Response({"error": "다른 소셜 계정으로 가입되어 있습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         except User.DoesNotExist:
-            # 기존에 가입된 유저가 없으면 새로 가입
+            # 기존에 가입된 유저가 없으면 유저 모델에 생성후 소셜어카운트에 포함시키는 로직
             new_user = User.objects.create(
                 email=user_email,
                 nickname=user_nickname,
                 profile_img=user_img,
             )
 
-            # 소셜 계정도 생성
+            # 소셜 계정도 생성하고 포함시키기
             SocialAccount.objects.create(
                 user_id=new_user.id,
                 uid=new_user.email,
@@ -246,6 +248,7 @@ class KakaoLogin(APIView):
 
             # 새로운 사용자에 대한 JWT 토큰 생성
             refresh = RefreshToken.for_user(new_user)
+            # 리프레시 토큰/ 액세스 토큰을 문자열로 변환하여 JSON 형식으로 응답 데이터에 포함시켜 프론트에게 전달
             return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "회원가입 성공"}, status=status.HTTP_201_CREATED)
 
 
