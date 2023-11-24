@@ -49,11 +49,15 @@ class ReadingView(APIView):
             )
 
     # 독해문제 생성
-    def post(self, request):
-
+    def post(self, request, quiz_id=None):
+        # 푼 독해문제 카운트
+        if quiz_id:
+            user = request.user
+            user.reading_nums += 1
+            user.save()
+            return Response(status=status.HTTP_200_OK)
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
-
             response_format={"type": "json_object"},
             messages=[
                 {"role": "system", "content": CONTENT},
@@ -146,9 +150,7 @@ class WordView(APIView):
                 ]
 
                 quiz = {
-
                     "id": correct_word.id,
-
                     "term": correct_word.term,
                     "meaning": correct_word.meaning,
                     "wrong": [word.meaning for word in wrong_words],
