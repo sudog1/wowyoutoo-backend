@@ -317,8 +317,7 @@ class GithubLogin(APIView):
             print(user)
             social_user = SocialAccount.objects.filter(
                 uid=user_emails[0]["email"]).first()
-            print(social_user)
-
+            
             # if social_user:
             #     refresh = RefreshToken.for_user(user)
 
