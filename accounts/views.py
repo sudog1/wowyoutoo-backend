@@ -45,12 +45,14 @@ class ProfileView(APIView):
         # print(request.data)
         
         user = get_object_or_404(User, id=user_id)
+
         user_email = user.email
         
         try:
             social_user = get_object_or_404(SocialAccount, uid=user_email)  # allauth의 소셜어카운트 모델
         except:
             social_user = None
+
 
         if request.user == user:
             if social_user:  # 소셜 계정일경우, 에러 메세지
@@ -197,7 +199,7 @@ class KakaoLogin(APIView):
             data={
                 "grant_type": "authorization_code",
                 "client_id": client_id,
-                "redirect_uri": "http://127.0.0.1:5500/templates/redirect.html",
+                "redirect_uri": "http://127.0.0.1:5501/templates/redirect.html",
                 "code": code_value,
             },
         )
@@ -226,8 +228,10 @@ class KakaoLogin(APIView):
             # 기존에 가입된 유저나 소셜 로그인 유저가 존재하면 로그인
             user = User.objects.get(email=user_email)
             social_user = SocialAccount.objects.filter(
+
                 uid=user_email).first()
             
+
             # 동일한 이메일의 유저가 있지만, 소셜 계정이 아닐 때
             if social_user is None:
                 return Response({"error": "소셜 계정이 아닌 이미 존재하는 이메일입니다."}, status=status.HTTP_400_BAD_REQUEST)
@@ -244,14 +248,14 @@ class KakaoLogin(APIView):
                 return Response({'refresh': str(refresh), 'access': str(refresh.access_token), 'provider': social_user.provider, "msg": "로그인 성공"}, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
-            # 기존에 가입된 유저가 없으면 새로 가입
+            # 기존에 가입된 유저가 없으면 유저 모델에 생성후 소셜어카운트에 포함시키는 로직
             new_user = User.objects.create(
                 email=user_email,
                 nickname=user_nickname,
                 profile_img=user_img,
             )
 
-            # 소셜 계정도 생성
+            # 소셜 계정도 생성하고 포함시키기
             SocialAccount.objects.create(
                 user_id=new_user.id,
                 uid=new_user.email,
@@ -260,7 +264,9 @@ class KakaoLogin(APIView):
 
             # 새로운 사용자에 대한 JWT 토큰 생성
             refresh = RefreshToken.for_user(new_user)
+
             return Response({'refresh': str(refresh), 'access': str(refresh.access_token), 'provider': social_user.provider, "msg": "회원가입 성공"}, status=status.HTTP_201_CREATED)
+
 
 
 class GithubLogin(APIView):
@@ -279,7 +285,7 @@ class GithubLogin(APIView):
             data={
                 "client_id": client_id,
                 "client_secret": client_secret,
-                "redirect_url": "http://127.0.0.1:5500/templates/redirect.html",
+                "redirect_url": "http://127.0.0.1:5501/templates/redirect.html",
                 "code": code_value,
             },
         )
@@ -316,10 +322,12 @@ class GithubLogin(APIView):
             user = User.objects.get(email=user_emails[0]["email"])
             print(user)
             social_user = SocialAccount.objects.filter(
+
                 uid=user_emails[0]["email"]).first()
             
             # if social_user:
             #     refresh = RefreshToken.for_user(user)
+
 
             #     return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "로그인 성공"}, status=status.HTTP_200_OK)
 
