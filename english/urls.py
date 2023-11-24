@@ -13,7 +13,9 @@ urlpatterns = [
         name="readingbook_detail",
     ),
     # db에 단어추가,단어시험보기
-    path("word/", views.WordView.as_view(), name="word"),
+    path("word/", views.WordView.as_view(), name="add_word"),
+    # 푼 단어 개수 추가
+    path("word/<word_id>/", views.WordView.as_view(), name="word_count"),
     # 내 단어장 조회
     path("wordsbook/", views.WordsBookView.as_view(), name="wordsbook_list"),
     # 내 단어장에 단어추가, 제거

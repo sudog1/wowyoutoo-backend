@@ -11,8 +11,7 @@ from .constants import (
     WRONG_WORDS_PER_QUIZ,
 )
 import json
-
-# from config.settings import OPENAI_API_KEY
+from django.db.models import F
 from .models import Word, ReadingQuiz, Level
 from .serializers import (
     MyWordSerializer,
@@ -164,7 +163,13 @@ class WordView(APIView):
             )
 
     # DB에 단어 추가
-    def post(self, request):
+    def post(self, request, word_id=None):
+        # 푼 단어 카운트
+        if word_id:
+            user = request.user
+            user.word_nums += 1
+            user.save()
+            return Response(status=status.HTTP_200_OK)
         term = request.data["term"]
         try:
             word = Word.object.get(term=term)
