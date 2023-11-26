@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "accounts",
     "english",
     "service",
+    "payments",
 ]
 
 SITE_ID = 1
