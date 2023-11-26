@@ -10,8 +10,8 @@ from .constants import (
     CORRECT_WORDS_COUNT,
     WRONG_WORDS_PER_QUIZ,
 )
-import g4f as openai
 import json
+from django.db.models import F
 from .models import Word, ReadingQuiz, Level
 from .serializers import (
     MyWordSerializer,
@@ -24,6 +24,11 @@ from deep_translator import (
     GoogleTranslator,
     DeeplTranslator,
 )
+
+from openai import OpenAI
+from config.settings import OPENAI_API_KEY
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 class ReadingView(APIView):
@@ -44,21 +49,27 @@ class ReadingView(APIView):
             )
 
     # 독해문제 생성
-    def post(self, request):
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            provider=openai.Provider.Liaobots,
+    def post(self, request, quiz_id=None):
+        # 푼 독해문제 카운트
+        if quiz_id:
+            user = request.user
+            user.reading_nums += 1
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-1106",
             response_format={"type": "json_object"},
             messages=[
                 {"role": "system", "content": CONTENT},
             ],
-            temperature=2,
-            finish_reason="length",
-            # stream=True,
+            temperature=1.5,
+            max_tokens=500,
         )
-        response = json.loads(response)
-        serializer = ReadingQuizSerializer(data=response)
-        level = Level.objects.get(step="C1")
+
+        data = json.loads(response.choices[0].message.content)
+        serializer = ReadingQuizSerializer(data=data)
+        level = Level.objects.get(step="B1")
+
         if serializer.is_valid():
             serializer.save(level=level)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -139,7 +150,7 @@ class WordView(APIView):
                 ]
 
                 quiz = {
-                    "id":correct_word.id,
+                    "id": correct_word.id,
                     "term": correct_word.term,
                     "meaning": correct_word.meaning,
                     "wrong": [word.meaning for word in wrong_words],
@@ -154,7 +165,13 @@ class WordView(APIView):
             )
 
     # DB에 단어 추가
-    def post(self, request):
+    def post(self, request, word_id=None):
+        # 푼 단어 카운트
+        if word_id:
+            user = request.user
+            user.word_nums += 1
+            user.save()
+            return Response(status=status.HTTP_200_OK)
         term = request.data["term"]
         try:
             word = Word.object.get(term=term)
@@ -192,7 +209,7 @@ class WordsBookView(APIView):
         words = user.words.all()
         word = get_object_or_404(Word, pk=word_id)
         if word not in words:
-            words.add(word)
+            user.words.add(word)
             return Response(
                 {"message": "내 단어장에 단어가 추가되었습니다."}, status=status.HTTP_200_OK
             )
