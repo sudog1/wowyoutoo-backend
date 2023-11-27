@@ -4,7 +4,7 @@ from .models import Payment, Product
 
 class PrepareSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source="user.email", read_only=True)
-    
+
     class Meta:
         model = Payment
         fields = (
@@ -14,6 +14,8 @@ class PrepareSerializer(serializers.ModelSerializer):
             "product_name",
             "email",
         )
+        
+        extra_kwargs = {"user":{"allow_null":True}}
         
 
 

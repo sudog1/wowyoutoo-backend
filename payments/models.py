@@ -20,8 +20,8 @@ class Product(models.Model):
     
     
 class Payment(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_payment_set")
-    product_name = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_payment_set", db_constraint=False, null=True)
+    product_name = models.CharField(max_length=50)
     merchant_uid = models.CharField(max_length=100, unique=True)
     status = models.CharField(max_length=50, blank=True, null=True)
     amount = models.PositiveIntegerField(validators=[MinValueValidator(100, message="100원 부터 결제가 가능합니다.")])
