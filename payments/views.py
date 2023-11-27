@@ -1,9 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import Payment, Product
+from .models import Payment, Product, CartItem
 from .serializers import PrepareSerializer, ProductSerializer
 import requests
 import json
@@ -11,10 +12,36 @@ from pathlib import Path
 import environ
 
 
-
+# 상품 리스트 페이지
 class ProductListView(ListAPIView):
     serializer_class = ProductSerializer
     queryset = Product.objects.filter(status=Product.Status.ACTIVE)
+
+
+class CartView(APIView):
+    # permission_classes = [IsAuthenticated]
+    
+    # cart에 물건 담기
+    def post(self, request, product_id):
+        #재고 있는 product 중, 선택된 product를 가져옴
+        product_active = Product.objects.filter(status=Product.Status.ACTIVE)
+        product = get_object_or_404(product_active, pk=product_id)
+        
+        # 선택된 수량을 가져옴, default 값은 1개
+        quantity = int(request.data.get("quantity", 1))
+        
+        # 선택된 product와 수량을 cart에 담음
+        cart_item, is_created = CartItem.objects.get_or_create(
+            # user=request.user,
+            product=product,
+            defaults={"quantity":quantity}
+        )
+        
+        if not is_created:
+            cart_item.quantity += quantity
+            cart_item.save()
+        
+        return Response({"message": "Product is added to cart"}, status=status.HTTP_201_CREATED)
 
 
 # 결제 전 검증을 위한 주문번호, 결제 예정 금액 DB 저장

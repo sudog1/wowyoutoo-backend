@@ -30,24 +30,27 @@ class Payment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Cart(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_cart_set")
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
+# class Cart(models.Model):
+#     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_cart_set")
+#     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+#     updated_at = models.DateTimeField(auto_now=True)
     
 
 class CartItem(models.Model):
-    cart_id = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    # cart_id = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    # user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, db_constraint=False, related_name="cart_product_set")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_cart_set")
-    quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1, message="1개 이상")])
-    
-
-class Order(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_order_set")
+    quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+# class Order(models.Model):
+#     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_order_set")
+#     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+#     updated_at = models.DateTimeField(auto_now=True)
     
     
-class OrderItem(models.Model):
-    order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+# class OrderItem(models.Model):
+#     order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
+#     product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
