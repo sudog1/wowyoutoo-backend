@@ -12,11 +12,13 @@ from accounts.serializers import (
 from rest_framework.permissions import AllowAny
 from django.shortcuts import redirect
 from json import JSONDecodeError
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 import requests
 from rest_framework import status, permissions
 import os
 from rest_framework import status
+
+from config.settings import EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL
 from .models import User
 from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.providers.kakao import views as kakao_view
@@ -149,7 +151,7 @@ class ConfirmEmailView(APIView):
     def get_object(self, queryset=None):
         # URL에서 추출한 이메일 확인 키를 사용하여 EmailConfirmationHMAC.from_key를 호출하여 이메일 확인 객체를 가져옴
         key = self.kwargs["key"]
-        email_confirmation = EmailConfirmationHMAC.from_key(key)
+        email_confirmation = EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL.from_key(key)
         if not email_confirmation:
             if queryset is None:
                 queryset = self.get_queryset()
@@ -199,7 +201,7 @@ class KakaoLogin(APIView):
             data={
                 "grant_type": "authorization_code",
                 "client_id": client_id,
-                "redirect_uri": "http://127.0.0.1:5501/templates/redirect.html",
+                "redirect_uri": "http://127.0.0.1:5500/templates/redirect.html",
                 "code": code_value,
             },
         )
@@ -265,7 +267,7 @@ class KakaoLogin(APIView):
             # 새로운 사용자에 대한 JWT 토큰 생성
             refresh = RefreshToken.for_user(new_user)
 
-            return Response({'refresh': str(refresh), 'access': str(refresh.access_token), 'provider': social_user.provider, "msg": "회원가입 성공"}, status=status.HTTP_201_CREATED)
+            return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "회원가입 성공"}, status=status.HTTP_201_CREATED)
 
 
 

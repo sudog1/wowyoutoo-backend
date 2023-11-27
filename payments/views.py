@@ -7,6 +7,9 @@ from .models import Payment, Product
 from .serializers import PrepareSerializer, ProductSerializer
 import requests
 import json
+from pathlib import Path
+import environ
+
 
 
 class ProductListView(ListAPIView):
@@ -18,7 +21,7 @@ class ProductListView(ListAPIView):
 class PrepareView(APIView):
     def post(self, request):
         # Need serializer?
-        serializer = PrepareSerializer(data=request.data)
+        serializer = PrepareSerializer(data=request.data, context={"email": request.user.email})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -28,6 +31,12 @@ class PrepareView(APIView):
 
 # 결제 후 검증
 class CompleteView(APIView):
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    env = environ.Env()
+    env.read_env(BASE_DIR / ".env")
+    IMP_KEY = env("IMP_KEY")
+    IMP_SECRET = env("IMP_SECRET")
+    
     # access token 발급 요청
     def get_token_api(self):
         API_HOST = "https://api.iamport.kr"
@@ -36,8 +45,8 @@ class CompleteView(APIView):
         
         headers = {"Content-Type": "application/json", "charset": "UTF-8", "Accept": "*/*"}
         body = {
-            "imp_key": "6175104161484081", # REST API Key
-            "imp_secret": "KA5Bvuy5xxtnvDCJLpKsmpFLje7rdjuNfbtONbHz0N7enmeKDc3zQ6nkvrItZ5JD8Mbl8hUnmWlRg9MO" # REST API Secret
+            "imp_key": self.IMP_KEY, # REST API Key
+            "imp_secret": self.IMP_SECRET # REST API Secret
         }
         try:
             response = requests.post(url, headers=headers, data=json.dumps(body, ensure_ascii=False, indent="\t"))
