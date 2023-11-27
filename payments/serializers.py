@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Payment
+from .models import Payment, Product
 
 
 class PrepareSerializer(serializers.ModelSerializer):
@@ -9,4 +9,16 @@ class PrepareSerializer(serializers.ModelSerializer):
             "id",
             "merchant_uid",
             "amount",
+        )
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = (
+            "id",
+            "product_name",
+            "description",
+            "price",
+            "status",
         )

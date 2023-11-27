@@ -1,13 +1,20 @@
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import Payment
-from .serializers import PrepareSerializer
+from .models import Payment, Product
+from .serializers import PrepareSerializer, ProductSerializer
 import requests
 import json
 
 
+class ProductListView(ListAPIView):
+    serializer_class = ProductSerializer
+    queryset = Product.objects.filter(status=Product.Status.ACTIVE)
+
+
+# 결제 전 검증을 위한 주문번호, 결제 예정 금액 DB 저장
 class PrepareView(APIView):
     def post(self, request):
         # Need serializer?
@@ -19,6 +26,7 @@ class PrepareView(APIView):
             return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# 결제 후 검증
 class CompleteView(APIView):
     # access token 발급 요청
     def get_token_api(self):
