@@ -19,7 +19,7 @@ class Command(BaseCommand):
         with open(csv_file, "r", newline="", encoding="utf-8") as file:
             csv_reader = csv.reader(file)
             for row in csv_reader:
-                data_to_insert.append(Word(content=row[0], meaning=row[1]))
+                data_to_insert.append(Word(term=row[0], meaning=row[1]))
                 if len(data_to_insert) >= 100:
                     # 효율을 위해 bulk_create사용
                     Word.objects.bulk_create(

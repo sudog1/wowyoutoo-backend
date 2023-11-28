@@ -11,9 +11,8 @@ from .constants import (
     WRONG_WORDS_PER_QUIZ,
 )
 import json
-
-# from config.settings import OPENAI_API_KEY
-from .models import Word, ReadingQuiz, Level
+from django.db.models import F
+from .models import Word, ReadingQuiz, Level, Select
 from .serializers import (
     MyWordSerializer,
     ReadingQuizListSerializer,
@@ -37,20 +36,28 @@ class ReadingView(APIView):
     def get(self, request):
         try:
             quizzes = list(ReadingQuiz.objects.order_by("?")[:READING_QUIZ_COUNT])
+            
             serializer = ReadingQuizSerializer(quizzes, many=True)
-            if serializer.is_valid():
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(
-                    serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+            # if serializer.is_valid():
+            #     return Response(serializer.data, status=status.HTTP_200_OK)
+            # else:
+            #     return Response(
+            #         serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            #     )
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     # 독해문제 생성
-    def post(self, request):
+    def post(self, request, quiz_id=None):
+        # 푼 독해문제 카운트
+        if quiz_id:
+            user = request.user
+            user.reading_nums += 1
+            user.save()
+            return Response(status=status.HTTP_200_OK)
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             response_format={"type": "json_object"},
@@ -60,9 +67,11 @@ class ReadingView(APIView):
             temperature=1.5,
             max_tokens=500,
         )
+
         data = json.loads(response.choices[0].message.content)
         serializer = ReadingQuizSerializer(data=data)
         level = Level.objects.get(step="B1")
+
         if serializer.is_valid():
             serializer.save(level=level)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -92,20 +101,24 @@ class ReadingBookView(APIView):
             user = request.user
             quizzes = user.reading_quizzes.all()
             serializer = ReadingQuizListSerializer(quizzes, many=True)
-            if serializer.is_valid():
+            try:
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
+            except:
                 return Response(
                     serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
 
     def post(self, request, quiz_id):
+        
         # 복습노트에 저장
         select = request.data.get("select")
+        
         user = request.user
         quiz = get_object_or_404(ReadingQuiz, pk=quiz_id)
+        
         if quiz not in user.reading_quizzes.all():
-            user.reading_quizzes.add(quiz, through_defaults={"select": select})
+            
+            user.reading_quizzes.add(quiz, through_defaults={"index": select})
             return Response({"message": "저장 완료"}, status=status.HTTP_200_OK)
         else:
             return Response(
@@ -158,7 +171,13 @@ class WordView(APIView):
             )
 
     # DB에 단어 추가
-    def post(self, request):
+    def post(self, request, word_id=None):
+        # 푼 단어 카운트
+        if word_id:
+            user = request.user
+            user.word_nums += 1
+            user.save()
+            return Response(status=status.HTTP_200_OK)
         term = request.data["term"]
         try:
             word = Word.object.get(term=term)
@@ -196,7 +215,7 @@ class WordsBookView(APIView):
         words = user.words.all()
         word = get_object_or_404(Word, pk=word_id)
         if word not in words:
-            words.add(word)
+            user.words.add(word)
             return Response(
                 {"message": "내 단어장에 단어가 추가되었습니다."}, status=status.HTTP_200_OK
             )
