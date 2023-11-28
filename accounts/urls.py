@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
 )
 from dj_rest_auth.registration.views import VerifyEmailView
 
+
 # from .views import google_login, google_callback, GoogleLogin
 
 urlpatterns = [

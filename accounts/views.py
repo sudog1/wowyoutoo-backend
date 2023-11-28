@@ -9,6 +9,7 @@ from accounts.serializers import (
     CustomRegisterSerializer,
     ProfileSerializer,
 )
+from django.http import HttpResponseRedirect
 from rest_framework.permissions import AllowAny
 from django.shortcuts import redirect
 from json import JSONDecodeError
@@ -27,11 +28,12 @@ from json.decoder import JSONDecodeError
 import json
 from dj_rest_auth.registration.views import RegisterView
 from django.contrib.auth import login
-from allauth.account.models import EmailConfirmation
+from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
 from django.db import models
 from django.db.models import F
+
 
 
 class ProfileView(APIView):
@@ -45,6 +47,7 @@ class ProfileView(APIView):
             serializer.data['score'] = serializer.get_score(profile)
             # 상위 10명의 랭킹된 사용자 닉네임 리스트 직렬화
             serializer.data['rankers'] = serializer.get_rankers(profile)
+            serializer.data['my_rank'] = serializer.get_my_rank(profile)
 
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
@@ -52,7 +55,6 @@ class ProfileView(APIView):
 
     def put(self, request, user_id):
         # print(request.data)
-
         user = get_object_or_404(User, id=user_id)
 
         user_email = user.email
@@ -149,6 +151,7 @@ class ConfirmEmailView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, *args, **kwargs):
+        print(self)
         # 사용자가 이메일 확인 링크로 GET 요청을 보낼 때 실행되는 메서드
         self.object = confirmation = self.get_object()
         confirmation.confirm(self.request)
@@ -156,6 +159,7 @@ class ConfirmEmailView(APIView):
         # 이메일 확인 객체를 가져오고, 해당 객체의 confirm 메서드를 호출하여 이메일을 확인
 
     def get_object(self, queryset=None):
+        print(self)
         # URL에서 추출한 이메일 확인 키를 사용하여 EmailConfirmationHMAC.from_key를 호출하여 이메일 확인 객체를 가져옴
         key = self.kwargs["key"]
         email_confirmation = EmailConfirmationHMAC.from_key(key)
@@ -250,6 +254,7 @@ class KakaoLogin(APIView):
             # 소셜 로그인 사용자의 경우
             if social_user:
                 # 사용자의 비밀번호 없이 로그인 가능한 JWT 토큰 생성
+                print(social_user)
                 refresh = RefreshToken.for_user(user)
                 return Response({'refresh': str(refresh), 'access': str(refresh.access_token), 'provider': social_user.provider, "msg": "로그인 성공"}, status=status.HTTP_200_OK)
 
