@@ -1,7 +1,10 @@
 import json
 from asgiref.sync import sync_to_async
-from .constants import CONTENT
+
+from .models import AIChatLog
+from .constants import CHAT_CONTENT, INIT_CONTENT
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.core.exceptions import ObjectDoesNotExist
 
 from openai import AsyncOpenAI
 from config.settings import OPENAI_API_KEY
@@ -11,13 +14,25 @@ client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 class ChatBotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.messages = [
-            {
-                "role": "system",
-                "content": CONTENT,
-            },
-        ]
         await self.accept()
+        user = self.scope["user"]
+        try:
+            chatlog = await AIChatLog.objects.aget(user=user)
+            self.messages = chatlog.messages
+        except ObjectDoesNotExist:
+            init_messages = [
+                {
+                    "role": "system",
+                    "content": INIT_CONTENT,
+                },
+            ]
+            scenario = await self.get_bot_response(init_messages)
+            self.messages = [
+                {
+                    "role": "system",
+                    "content": CHAT_CONTENT.format("B1", user.nickname, scenario),
+                },
+            ]
         bot_res = await self.get_bot_response(self.messages)
         self.messages.append(
             {
@@ -35,7 +50,10 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
         )
 
     async def disconnect(self, close_code):
-        pass
+        user = self.scope["user"]
+        chatlog = await AIChatLog.objects.aget_or_create(
+            user=user, defaults={"messages": self.messages}
+        )
 
     async def receive(self, text_data):
         user_res = json.loads(text_data)
@@ -67,7 +85,6 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
         response = await client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
-            temperature=1.2,
         )
         return response.choices[0].message
 
