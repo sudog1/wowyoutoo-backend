@@ -32,7 +32,7 @@ class CartView(APIView):
         
         # 선택된 product와 수량을 cart에 담음
         cart_item, is_created = CartItem.objects.get_or_create(
-            # user=request.user,
+            user=request.user,###
             product=product,
             defaults={"quantity":quantity}
         )
@@ -79,7 +79,7 @@ class CompleteView(APIView):
             response = requests.post(url, headers=headers, data=json.dumps(body, ensure_ascii=False, indent="\t"))
             json_object = response.json() # json 객체로 변환
             token_val = json_object["response"]["access_token"] # 토큰값 파싱
-            print(token_val)
+            # print(token_val)
             return token_val
         except Exception as ex:
             return None

@@ -38,7 +38,7 @@ class Payment(models.Model):
 
 class CartItem(models.Model):
     # cart_id = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    # user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, db_constraint=False, related_name="cart_product_set")
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, db_constraint=False, related_name="cart_product_set") ###
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_cart_set")
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
