@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Payment, Product, CartItem
-from .serializers import PrepareSerializer, ProductSerializer
+from .serializers import PrepareSerializer, ProductSerializer, NestedListSerializer
 import requests
 import json
 from pathlib import Path
@@ -19,7 +19,7 @@ class ProductListView(ListAPIView):
 
 
 class CartView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     
     # cart에 물건 담기
     def post(self, request, product_id):
@@ -32,7 +32,7 @@ class CartView(APIView):
         
         # 선택된 product와 수량을 cart에 담음
         cart_item, is_created = CartItem.objects.get_or_create(
-            user=request.user,###
+            user=request.user,
             product=product,
             defaults={"quantity":quantity}
         )
@@ -42,6 +42,42 @@ class CartView(APIView):
             cart_item.save()
         
         return Response({"message": "Product is added to cart"}, status=status.HTTP_201_CREATED)
+        
+    def get(self, request):
+        # 현재 user의 장바구니의 모든 상품들을 가져옴
+        items = CartItem.objects.filter(user=request.user)
+        
+        # 장바구니 페이지에서 보여줄 attributes
+        product_names = []
+        descriptions = []
+        prices = []
+        quantities = []
+        
+        for item in items:
+            product_name = item.product.product_name
+            description = item.product.description
+            price = item.product.price
+            quantity = item.quantity
+            
+            product_names.append(product_name)
+            descriptions.append(description)
+            prices.append(price)
+            quantities.append(quantity)
+        
+        # 장바구니에 보여줄 상품 정보 보기 좋게 list 형식으로 자리 바꿈   
+        transposed_lists = list(zip(product_names, descriptions, prices, quantities))
+        
+        # Serialize the transposed lists
+        serialized_data = [NestedListSerializer(data={"product_name": row[0], "description": row[1], "price": row[2], "quantity": row[3]}) for row in transposed_lists]
+        
+        # serializer 검증
+        for serializer in serialized_data:
+            serializer.is_valid(raise_exception=True)
+        
+        # Get the serialized data
+        serialized_data = [serializer.validated_data for serializer in serialized_data]
+
+        return Response(serialized_data, status=status.HTTP_201_CREATED)
 
 
 # 결제 전 검증을 위한 주문번호, 결제 예정 금액 DB 저장

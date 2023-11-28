@@ -274,12 +274,8 @@ class KakaoLogin(APIView):
             refresh = RefreshToken.for_user(new_user)
 
             return Response({'refresh': str(refresh), 'access': str(refresh.access_token), "msg": "회원가입 성공"}, status=status.HTTP_201_CREATED)
-<<<<<<< HEAD
-
-=======
->>>>>>> d9d24bedd51f593b3d79f4198460e27f16fd327d
-
-
+        
+        
 class GithubLogin(APIView):
     def post(self, request):
         state = os.environ.get("STATE")

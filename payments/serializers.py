@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Payment, Product
+from .models import Payment, Product, CartItem
 
 
 class PrepareSerializer(serializers.ModelSerializer):
@@ -29,3 +29,18 @@ class ProductSerializer(serializers.ModelSerializer):
             "price",
             "status",
         )
+    
+
+class NestedListSerializer(serializers.Serializer):
+    product_name = serializers.CharField()
+    description = serializers.CharField()
+    price = serializers.IntegerField()
+    quantity = serializers.IntegerField()
+
+# class CartItemSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = CartItem
+#         fields = (
+#             "product_id",
+#             ""
+#         )
