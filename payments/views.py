@@ -42,7 +42,8 @@ class CartView(APIView):
             cart_item.save()
         
         return Response({"message": "Product is added to cart"}, status=status.HTTP_201_CREATED)
-        
+    
+    # 장바구니 상품 불러오기   
     def get(self, request):
         # 현재 user의 장바구니의 모든 상품들을 가져옴
         items = CartItem.objects.filter(user=request.user)
@@ -78,6 +79,29 @@ class CartView(APIView):
         serialized_data = [serializer.validated_data for serializer in serialized_data]
 
         return Response(serialized_data, status=status.HTTP_201_CREATED)
+    
+    # 장바구니 업데이트
+    def put(self, request):
+        try:
+            updated_products = request.data.get("updatedProducts", [])
+
+            for updated_product in updated_products:
+                product_name = updated_product.get("product_name")
+                quantity = int(updated_product.get("quantity", 1))
+                
+                product = Product.objects.get(product_name=product_name)
+                cart_item = CartItem.objects.get(user=request.user, product=product)
+
+                cart_item.quantity = quantity
+                cart_item.save()
+                
+            return Response({"message": "Cart updated successfully"}, status=status.HTTP_200_OK)
+        
+        except CartItem.DoesNotExist:
+            return Response({"error": "CartItem not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # 결제 전 검증을 위한 주문번호, 결제 예정 금액 DB 저장
