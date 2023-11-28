@@ -41,6 +41,7 @@ class ReadingQuizListSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "title",
+            "paragraph",
         )
 
 
