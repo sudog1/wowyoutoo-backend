@@ -12,7 +12,7 @@ from .constants import (
 )
 import json
 from django.db.models import F
-from .models import Word, ReadingQuiz, Level
+from .models import Word, ReadingQuiz, Level, Select
 from .serializers import (
     MyWordSerializer,
     ReadingQuizListSerializer,
@@ -36,13 +36,15 @@ class ReadingView(APIView):
     def get(self, request):
         try:
             quizzes = list(ReadingQuiz.objects.order_by("?")[:READING_QUIZ_COUNT])
+            
             serializer = ReadingQuizSerializer(quizzes, many=True)
-            if serializer.is_valid():
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(
-                    serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+            # if serializer.is_valid():
+            #     return Response(serializer.data, status=status.HTTP_200_OK)
+            # else:
+            #     return Response(
+            #         serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            #     )
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -99,20 +101,24 @@ class ReadingBookView(APIView):
             user = request.user
             quizzes = user.reading_quizzes.all()
             serializer = ReadingQuizListSerializer(quizzes, many=True)
-            if serializer.is_valid():
+            try:
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
+            except:
                 return Response(
                     serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
 
     def post(self, request, quiz_id):
+        
         # 복습노트에 저장
         select = request.data.get("select")
+        
         user = request.user
         quiz = get_object_or_404(ReadingQuiz, pk=quiz_id)
+        
         if quiz not in user.reading_quizzes.all():
-            user.reading_quizzes.add(quiz, through_defaults={"select": select})
+            
+            user.reading_quizzes.add(quiz, through_defaults={"index": select})
             return Response({"message": "저장 완료"}, status=status.HTTP_200_OK)
         else:
             return Response(
