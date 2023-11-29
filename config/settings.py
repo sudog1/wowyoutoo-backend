@@ -7,24 +7,14 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# load env
-env = environ.Env(
-    # set casting, default value
-    DEBUG=(bool, False)
-)
-
-# BASE_DIR은 manage.py가 위치한 디렉토리입니다.
-# .env파일은 BASE_DIR안에 위치해야 합니다.
-environ.Env.read_env(BASE_DIR / ".env")
-
-SECRET_KEY = env("SECRET_KEY")
-DEBUG = env("DEBUG")
-OPENAI_API_KEY = env("OPENAI_API_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv("DEBUG", 1)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["backend"]
 CORS_ALLOW_ALL_ORIGINS = True
 
 
@@ -132,7 +122,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(env("HOST_URL"), 6379)],
+            "hosts": [("redis", 6379)],
         },
     },
 }
@@ -143,9 +133,13 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    },
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": os.getenv("POSTGRES_PORT"),
+    }
 }
 
 
@@ -198,7 +192,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": False,
     "ALGORITHM": "HS256",
-    "SIGNING_KEY": env("SECRET_KEY"),
+    "SIGNING_KEY": os.getenv("SECRET_KEY"),
     "VERIFYING_KEY": "",
     "AUDIENCE": None,
     "ISSUER": None,
@@ -228,32 +222,30 @@ SIMPLE_JWT = {
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-
+STATIC_ROOT = BASE_DIR / "static"
 STATIC_URL = "/static/"
 
 MEDIAFILES_DIRS = [
     BASE_DIR / "media",
 ]
-
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media').replace('\\', '/')
-
+MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
 
 # OAuth 리다이렉트 url
-REDIRECT_URL = env("REDIRECT_URL")
+REDIRECT_URL = os.getenv("REDIRECT_URL")
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"  # 메일 호스트 서버
 EMAIL_PORT = "587"  # gmail과 통신하는 포트
-EMAIL_HOST_USER = env("EMAIL_HOST_USER")  # 발신할 이메일
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # 발신할 메일의 비밀번호
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")  # 발신할 이메일
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")  # 발신할 메일의 비밀번호
 EMAIL_USE_TLS = True  # TLS 보안 방법
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 사이트와 관련한 자동응답을 받을 이메일 주소
 
 CELERY_ALWAYS_EAGER = True
-CELERY_BROKER_URL = env("CELERY_BROKER_URL")  # redis서버의 주소와 다르면 바꾸세요
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")  # redis서버의 주소와 다르면 바꾸세요
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -275,7 +267,9 @@ ACCOUNT_UNIQUE_EMAIL = True
 # ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 
 # 이메일 인증 사용하지 않음
-ACCOUNT_EMAIL_VERIFICATION = "none"
+# ACCOUNT_EMAIL_VERIFICATION = "none"
+
+ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION")
 
 EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = (
     "/"  # 사이트와 관련한 자동응답을 받을 이메일 주소,'webmaster@localhost'
