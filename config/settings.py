@@ -227,15 +227,18 @@ SIMPLE_JWT = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+STATIC_URL = "static/"
 
-# MEDIAFILES_DIRS = [
-#     BASE_DIR / "media",
-# ]
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIAFILES_DIRS = [
+    BASE_DIR / "media",
+]
+
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media').replace('\\', '/')
 
 MEDIA_URL = "/media/"
 
@@ -248,7 +251,7 @@ EMAIL_HOST_PASSWORD = "zxpm kdwl iqfl bxnm"  # 발신할 메일의 비밀번호
 EMAIL_USE_TLS = True  # TLS 보안 방법
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 사이트와 관련한 자동응답을 받을 이메일 주소
 
-STATIC_URL = "/static/"
+
 
 CELERY_ALWAYS_EAGER = True
 CELERY_BROKER_URL = "redis://127.0.0.1:6379"  # redis서버의 주소와 다르면 바꾸세요

@@ -20,6 +20,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     word_nums = serializers.IntegerField()  # 단어 푼 수
     score = serializers.SerializerMethodField()  # 사용자의 순위 점수(독해 문제 푼 수 + 정답한 단어 수)
     rankers = serializers.SerializerMethodField()  # 닉네임 리스트
+    my_rank = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -32,6 +33,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "word_nums",
             "score",
             "rankers",
+            "my_rank",
         )
 
     # 독해 문제 푼 수와 단어 푼 수를 더하여 순위 점수를 계산
@@ -45,6 +47,15 @@ class ProfileSerializer(serializers.ModelSerializer):
             score=F('reading_nums') + F('word_nums')
         ).order_by('-score')[:10]
         return [user.nickname for user in top_10_rankers]
+    
+    def get_my_rank(self, obj):
+        top_10_rankers = User.objects.annotate(
+            score=F('reading_nums') + F('word_nums')
+        ).order_by('-score')
+        my_rank = list(top_10_rankers.values_list(F('email'), flat=True)).index(obj.email) + 1
+        
+        return my_rank
+
 
 
 class CustomRegisterSerializer(RegisterSerializer):
@@ -53,6 +64,7 @@ class CustomRegisterSerializer(RegisterSerializer):
     # Define transaction.atomic to rollback the save operation in case of error
     @transaction.atomic
     def save(self, request):
+        # print(self)
         user = super().save(request)
         user.nickname = self.data.get("nickname")
         user.save()
