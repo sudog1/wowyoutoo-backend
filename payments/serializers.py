@@ -3,7 +3,7 @@ from .models import Payment, Product, CartItem
 
 
 class PrepareSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(source="user.email", read_only=True)
+    # email = serializers.EmailField(source="user.email", read_only=True)
 
     class Meta:
         model = Payment
@@ -12,10 +12,10 @@ class PrepareSerializer(serializers.ModelSerializer):
             "merchant_uid",
             "amount",
             "product_name",
-            "email",
+            # "email",
         )
         
-        extra_kwargs = {"user":{"allow_null":True}}
+        # extra_kwargs = {"user":{"allow_null":True}}
         
 
 

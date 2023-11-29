@@ -140,8 +140,38 @@ class CartView(APIView):
 # 결제 전 검증을 위한 주문번호, 결제 예정 금액 DB 저장
 class PrepareView(APIView):
     def post(self, request):
-        # Need serializer?
-        serializer = PrepareSerializer(data=request.data, context={"email": request.user.email})
+        # 현재 user의 장바구니 상품들 모두 가져옴
+        items = CartItem.objects.filter(user=request.user)
+        
+        # 결제해야 할 금액
+        total_price_tobe_paid = 0 
+        
+        for item in items:
+            price = item.product.price
+            quantity = item.quantity
+            
+            total_price_tobe_paid += price * quantity
+            
+        merchant_uid = request.data.get("merchant_uid")
+        product_name = request.data.get("product_name")
+        user = request.user
+        
+        request.data["amount"] = total_price_tobe_paid
+        
+        payment = Payment.objects.get_or_create(
+            user=user,
+            merchant_uid = merchant_uid,
+            amount = total_price_tobe_paid,
+            product_name = product_name
+        )
+
+        # serializer = PrepareSerializer(data=payment, context={"email": request.user.email})
+        # if serializer.is_valid():
+        #     serializer.save()
+        
+        # serializer = PrepareSerializer(data=payment, context={"email": user.email})
+        serializer = PrepareSerializer(data=payment)
+        print(serializer)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
