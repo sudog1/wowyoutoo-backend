@@ -58,8 +58,6 @@ class User(AbstractBaseUser):
     reading_nums = models.PositiveIntegerField(default=0)
     word_nums = models.PositiveIntegerField(default=0)
     coin = models.SmallIntegerField(default=30)
-    # chat_coin = models.SmallIntegerField(default=10)
-    # reading_coin = models.SmallIntegerField(default=30)
     # social_login = models.BooleanField(default=True)
 
     objects = UserManager()

@@ -36,11 +36,3 @@ class NestedListSerializer(serializers.Serializer):
     description = serializers.CharField()
     price = serializers.IntegerField()
     quantity = serializers.IntegerField()
-
-# class CartItemSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = CartItem
-#         fields = (
-#             "product_id",
-#             ""
-#         )

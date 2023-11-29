@@ -30,14 +30,7 @@ class Payment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-# class Cart(models.Model):
-#     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_cart_set")
-#     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-    
-
 class CartItem(models.Model):
-    # cart_id = models.ForeignKey(Cart, on_delete=models.CASCADE)
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, null=True, blank=True, related_name="cart_product_set")
     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, db_constraint=False) 
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_cart_set")
@@ -46,15 +39,7 @@ class CartItem(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-# class Order(models.Model):
-#     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_order_set")
-#     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-    
-    
 class OrderItem(models.Model):
-    # order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
-    # product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, db_constraint=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

@@ -34,6 +34,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "score",
             "rankers",
             "my_rank",
+            "coin",
         )
 
     # 독해 문제 푼 수와 단어 푼 수를 더하여 순위 점수를 계산
