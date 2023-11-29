@@ -13,7 +13,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-ALLOWED_HOSTS = ["daphne"]
+ALLOWED_HOSTS = ["backend"]
 CORS_ALLOW_ALL_ORIGINS = True
 
 
