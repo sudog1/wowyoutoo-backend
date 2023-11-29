@@ -158,25 +158,16 @@ class PrepareView(APIView):
         
         request.data["amount"] = total_price_tobe_paid
         
-        payment = Payment.objects.get_or_create(
+        payment = Payment.objects.create(
             user=user,
             merchant_uid = merchant_uid,
             amount = total_price_tobe_paid,
             product_name = product_name
         )
-
-        # serializer = PrepareSerializer(data=payment, context={"email": request.user.email})
-        # if serializer.is_valid():
-        #     serializer.save()
         
-        # serializer = PrepareSerializer(data=payment, context={"email": user.email})
-        serializer = PrepareSerializer(data=payment)
-        print(serializer)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        serializer = PrepareSerializer(instance=payment)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 # 결제 후 검증
@@ -238,9 +229,9 @@ class CompleteView(APIView):
                     order.save()
                 
                 return Response({"detail": "결제 완료"}, status=response.status_code)
+            
             except Exception as ex:
                 return Response({"error": str(ex)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
         else:
             return Response({"error": "access token을 발급받는데 실패했습니다."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    # response_data:  {'code': 0, 'message': None, 'response': {'amount': 100, 'apply_num': '00000000', 'bank_code': None, 'bank_name': None, 'buyer_addr': '서울특별시 강남구 신사동', 'buyer_email': 'gildong@gmail.com', 'buyer_name': '홍길동', 'buyer_postcode': '01181', 'buyer_tel': '010-4242-4242', 'cancel_amount': 0, 'cancel_history': [], 'cancel_reason': None, 'cancel_receipt_urls': [], 'cancelled_at': 0, 'card_code': '366', 'card_name': '신한(구.LG카드 포함)카드', 'card_number': '4364200782968521', 'card_quota': 0, 'card_type': 1, 'cash_receipt_issued': False, 'channel': 'pc', 'currency': 'KRW', 'custom_data': None, 'customer_uid': None, 'customer_uid_usage': None, 'emb_pg_provider': None, 'escrow': False, 'fail_reason': None, 'failed_at': 0, 'imp_uid': 'imp_850683311385', 'merchant_uid': 'a07ed0aa-af71-45ca-91ab-cfc513edd72f', 'name': '노르웨이 회전 의자', 'paid_at': 1701008726, 'pay_method': 'card', 'pg_id': 'tlgdacomxpay', 'pg_provider': 'uplus', 'pg_tid': 'tlgda20231126232526np3s4', 'receipt_url': 'http://pgweb.dacom.net:7085/pg/wmp/etc/jsp/Receipt_Link.jsp?mertid=tlgdacomxpay&tid=tlgda20231126232526np3s4&authdata=f15901ec30ace794dbd9624097263922', 'started_at': 1701008683, 'status': 'paid', 'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36', 'vbank_code': None, 'vbank_date': 0, 'vbank_holder': None, 'vbank_issued_at': 0, 'vbank_name': None, 'vbank_num': None}}
