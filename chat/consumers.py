@@ -8,63 +8,70 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from openai import AsyncOpenAI
 from config.settings import OPENAI_API_KEY
+from collections import deque
 
 client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 
 class ChatBotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        await self.accept()
         user = self.scope["user"]
-        try:
-            chatlog = await AIChatLog.objects.aget(user=user)
-            self.messages = chatlog.messages
-        except ObjectDoesNotExist:
+        await self.accept()
+        # 채팅을 가져오거나 생성
+        self.chatlog = await AIChatLog.objects.aget_or_create(user=user)
+        # 채팅 진행중
+        if self.chatlog.ongoing:
+            scenario = self.chatlog.scenario
+            messages = self.chatlog.messages
+            # token_count = self.chatlog.token_count
+        # 채팅 첫 시작 또는 재시작
+        else:
+            # 새로운 시나리오 생성
             init_messages = [
                 {
                     "role": "system",
                     "content": INIT_CONTENT,
                 },
             ]
-            scenario = await self.get_bot_response(init_messages)
-            self.messages = [
+            scenario = await ChatBotConsumer.create_scenario(init_messages)
+            # 시스템 메시지 추가
+            messages = [
                 {
                     "role": "system",
-                    "content": CHAT_CONTENT.format("B1", user.nickname, scenario),
+                    "content": CHAT_CONTENT.format(user.nickname, "B1", scenario),
                 },
             ]
-        bot_res = await self.get_bot_response(self.messages)
-        self.messages.append(
-            {
-                "role": bot_res.role,
-                "content": bot_res.content,
-            }
-        )
-        await self.send(
-            text_data=json.dumps(
+            self.chatlog.ongoing = True
+            self.chatlog.scenario = scenario
+            self.chatlog.messags = messages
+
+        # 대화를 시작했거나 마지막에 유저가 답한 경우
+        if messages[-1]["role"] != "assistant":
+            bot_res = await ChatBotConsumer.get_bot_response(messages)
+            messages.append(
                 {
                     "role": bot_res.role,
                     "content": bot_res.content,
                 }
             )
+        await self.send(
+            text_data=json.dumps({"scenario": scenario, "messages": messages})
         )
 
     async def disconnect(self, close_code):
-        user = self.scope["user"]
-        chatlog = await AIChatLog.objects.aget_or_create(
-            user=user, defaults={"messages": self.messages}
-        )
+        self.chatlog.save()
 
     async def receive(self, text_data):
+        messages = self.chatlog.messages
         user_res = json.loads(text_data)
-        self.messages.append(
+        messages.append(
             {
                 "role": user_res["role"],
                 "content": user_res["content"],
             }
         )
-        bot_res = await self.get_bot_response(self.messages)
-        self.messages.append(
+        bot_res = await ChatBotConsumer.get_bot_response(messages)
+        messages.append(
             {
                 "role": bot_res.role,
                 "content": bot_res.content,
@@ -85,8 +92,19 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
         response = await client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
+            temperature=0.7,
         )
         return response.choices[0].message
+
+    @classmethod
+    async def create_scenario(cls, messages):
+        response = await client.chat.completions.create(
+            model="gpt-3.5-turbo-1106",
+            response_format={"type": "json_object"},
+            messages=messages,
+            temperature=1,
+        )
+        return response.choices[0].message.content
 
 
 # class ChatUserConsumer(AsyncWebsocketConsumer):

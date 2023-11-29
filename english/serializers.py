@@ -53,7 +53,7 @@ class ReadingQuizSerializer(serializers.ModelSerializer):
             "title",
             "paragraph",
             "question",
-            "answers",
+            "options",
             "solution",
             "explanation",
         )
