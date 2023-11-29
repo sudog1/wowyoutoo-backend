@@ -1,4 +1,3 @@
-import environ
 from pathlib import Path
 from datetime import timedelta
 import os
@@ -219,15 +218,11 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+STATICFILES_DIRS = []
 STATIC_ROOT = BASE_DIR / "static"
 STATIC_URL = "/static/"
 
-MEDIAFILES_DIRS = [
-    BASE_DIR / "media",
-]
+MEDIAFILES_DIRS = []
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
 
