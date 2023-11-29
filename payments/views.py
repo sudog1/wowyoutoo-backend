@@ -6,12 +6,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.contrib.auth import get_user_model
 from .models import Payment, Product, CartItem, OrderItem
 from .serializers import PrepareSerializer, ProductSerializer, NestedListSerializer
 import requests
 import json
 from pathlib import Path
 import environ
+import re
 
 
 # 상품 리스트 페이지
@@ -245,16 +247,34 @@ class CompleteView(APIView):
                     # To ensure consistency
                     with transaction.atomic():
                         order_items = []
+                        num_purchased_coin = 0
                         for cart_item in cart_items:    
                             order_item = OrderItem.objects.create(
                                 user=payment.user,
                                 product=cart_item.product,
                                 quantity=cart_item.quantity,
                             )
-                            order_items.append(order_item)    
+                            order_items.append(order_item)
+
+                            # 구입한 coin 개수만큼 해당 user에 coin 지급
+                            quantity = order_item.quantity
+                            product_name = order_item.product.product_name
+                            match = re.search(r'\b\d+\b', product_name)
+                            
+                            if match:
+                                num_coin = int(match.group())
+                                print("num_coin: ", num_coin)
+                                num_purchased_coin += num_coin*quantity
+                            else:
+                                print("No number found in the string.")
+                            
+                        print('num_purchased_coin: ', num_purchased_coin)
                             
                         cart_items.delete()
-                        
+ 
+                    user = get_user_model().objects.get(pk=payment.user.pk)
+                    user.coin += num_purchased_coin
+                    user.save()
                 
                 return Response({"detail": "결제 완료"}, status=response.status_code)
             
