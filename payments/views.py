@@ -1,10 +1,12 @@
+import logging
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import Payment, Product, CartItem
+from django.db import transaction
+from .models import Payment, Product, CartItem, OrderItem
 from .serializers import PrepareSerializer, ProductSerializer, NestedListSerializer
 import requests
 import json
@@ -158,12 +160,18 @@ class PrepareView(APIView):
         
         request.data["amount"] = total_price_tobe_paid
         
+        # Payment object 생성
         payment = Payment.objects.create(
             user=user,
             merchant_uid = merchant_uid,
             amount = total_price_tobe_paid,
             product_name = product_name
         )
+        
+        # 현재 user의 cart에 들어있는 상품들에게 payment_id 값을 assign
+        for item in items:
+            item.payment_id = payment
+            item.save()
         
         serializer = PrepareSerializer(instance=payment)
 
@@ -203,9 +211,9 @@ class CompleteView(APIView):
         #PortOne으로부터 imp_uid, merchant_uid 수신
         imp_uid = request.data.get("imp_uid")
         merchant_uid = request.data.get("merchant_uid")
-        order = get_object_or_404(Payment, merchant_uid=merchant_uid)
+        payment = get_object_or_404(Payment, merchant_uid=merchant_uid)
         
-        #Get the access token
+        # Get the access token
         access_token = self.get_token_api()
         
         if access_token:
@@ -220,17 +228,38 @@ class CompleteView(APIView):
                 response_data = response.json()
                 
                 #결제 검증
-                amount_to_be_paid = order.amount
+                amount_to_be_paid = payment.amount
                 paid_amount = response_data.get("response", {}).get("amount")
-                print("paid_amount: ", paid_amount)
+
                 if paid_amount == amount_to_be_paid:
-                    order.status = response_data.get("response", {}).get("status") #Update the status based on the PortOne response
-                    order.paid_amount = paid_amount
-                    order.save()
+                    payment.status = response_data.get("response", {}).get("status") #Update the status based on the PortOne response
+                    payment.paid_amount = paid_amount
+                    payment.save()
+                print("payment.user: ", payment.user)
+
+                # 장바구니 속 상품들의 payment_id의 상태 값이 'paid'일 경우,
+                # 장바구니 비워주고, Order 테이블에 상품 내역 저장
+                if payment.status == "paid":
+                    cart_items = CartItem.objects.filter(user=payment.user)
+
+                    # To ensure consistency
+                    with transaction.atomic():
+                        order_items = []
+                        for cart_item in cart_items:    
+                            order_item = OrderItem.objects.create(
+                                user=payment.user,
+                                product=cart_item.product,
+                                quantity=cart_item.quantity,
+                            )
+                            order_items.append(order_item)    
+                            
+                        cart_items.delete()
+                        
                 
                 return Response({"detail": "결제 완료"}, status=response.status_code)
             
             except Exception as ex:
+                logging.error(f"Error: {ex}")
                 return Response({"error": str(ex)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
         else:

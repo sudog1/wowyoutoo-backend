@@ -38,7 +38,8 @@ class Payment(models.Model):
 
 class CartItem(models.Model):
     # cart_id = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, db_constraint=False, related_name="cart_product_set") ###
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, null=True, blank=True, related_name="cart_product_set")
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, db_constraint=False) 
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_cart_set")
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -51,6 +52,11 @@ class CartItem(models.Model):
 #     updated_at = models.DateTimeField(auto_now=True)
     
     
-# class OrderItem(models.Model):
-#     order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
-#     product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+class OrderItem(models.Model):
+    # order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
+    # product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, db_constraint=False)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
