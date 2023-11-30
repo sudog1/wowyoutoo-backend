@@ -1,9 +1,10 @@
 from django.contrib import admin
-from .models import Payment, Product, CartItem
+from .models import Payment, Product, CartItem, OrderItem
 
 # Register your models here.
 admin.site.register(Payment)
 admin.site.register(CartItem)
+admin.site.register(OrderItem)
 
 
 @admin.register(Product)
