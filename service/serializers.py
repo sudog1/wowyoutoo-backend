@@ -8,7 +8,7 @@ class AnnoncementSerializer(serializers.ModelSerializer):
 class AnnoucementListSerializer(serializers.ModelSerializer):
     class Meta:
         model=Announcement
-        fields=["title","created_at",'updated_at']
+        fields=["id","title","created_at",'updated_at']
 
 class QnaListSerializer(serializers.ModelSerializer):
     author=serializers.SerializerMethodField()
@@ -16,7 +16,7 @@ class QnaListSerializer(serializers.ModelSerializer):
         return {obj.author.username,obj.author.id}
     class Meta:
         model=Qna
-        fields=["title","author","created_at","is_answered"]
+        fields=["id","title","author","created_at","is_answered","is_private","question_type"]
 
 class QnaSerializer(serializers.ModelSerializer):
     author=serializers.SerializerMethodField()
@@ -25,6 +25,11 @@ class QnaSerializer(serializers.ModelSerializer):
     class Meta: 
         model=Qna
         fields='__all__'
+
+class QnaCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Qna
+        fields=['title','content','image','is_private',"question_type"]
 
 class QnaResponseSerializer(serializers.ModelSerializer):
     class Meta:
