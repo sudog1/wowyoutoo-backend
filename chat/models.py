@@ -5,8 +5,8 @@ from english.models import Level
 
 # Create your models here.
 class AIChatLog(models.Model):
-    messages = models.JSONField()
-    scenario = models.TextField()
+    messages = models.JSONField(default=list)
+    scenario = models.TextField(blank=True)
     # token_count = models.PositiveIntegerField(default=0)
     ongoing = models.BooleanField(default=False)
     user = models.OneToOneField(

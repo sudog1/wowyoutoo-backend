@@ -20,6 +20,7 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 OPENAI_API_KEY = env("OPENAI_API_KEY")
+DEEPL_API_KEY = env("DEEPL_API_KEY")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -249,7 +250,6 @@ EMAIL_HOST_USER = "danielhochan1@gmail.com"  # 발신할 이메일
 EMAIL_HOST_PASSWORD = "zxpm kdwl iqfl bxnm"  # 발신할 메일의 비밀번호
 EMAIL_USE_TLS = True  # TLS 보안 방법
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 사이트와 관련한 자동응답을 받을 이메일 주소
-
 
 
 CELERY_ALWAYS_EAGER = True

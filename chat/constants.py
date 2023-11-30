@@ -19,13 +19,15 @@ Follow the format of the example to create a scenario with JSON.
 """
 
 CHAT_CONTENT = """
-the following scenario is written from your perspective. In other words, “You” in the scenario refers to me. 
-You take on the role of the person I am talking to. my name is {0}. My CEFR level is {1}.
-Let's start a dialogue appropriately for my level to improve my conversation skills.
-the dialogue is based on the scenario.
-the scenario are provided as strings in JSON format.
+I want to practice conversation with you for English conversation. We will take a role within the scenario and have a conversation. The scenario I'm going to read is given, and I play the role of what the scenario refers to as "you", and you have to play the role of the person to talk to "you". When you say it, I say it next, and when I say it, you say it. The conversation should be interactive. Don't write all the scripts that the two characters are talking about.
+I will provide you with information to have a conversation.
+- My name in the conversation is {nickname}.
+- My English level is {level} based on CEFR.
+- Please adjust the level of conversation to my English level.
+- Do not write any explanations other than the lines.
+- The scenario is given as JSON string below.
 
 ```json
-{2}
+{scenario}
 ```
 """
