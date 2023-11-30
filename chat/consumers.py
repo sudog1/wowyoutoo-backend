@@ -37,7 +37,6 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
                 },
             ]
             scenario = await ChatBotConsumer.create_scenario(init_messages)
-
             # 시스템 메시지 추가
             messages = [
                 {
@@ -61,11 +60,11 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
                     "content": bot_res.content,
                 }
             )
-        print(messages)
         await self.send(text_data=json.dumps(messages[1:]))
 
     async def disconnect(self, close_code):
-        print(self.chatlog)
+        if close_code == 1000:
+            self.chatlog.ongoing = False
         await self.chatlog.asave()
 
     async def receive(self, text_data):
@@ -95,6 +94,7 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
                 ]
             )
         )
+        print(messages)
 
     @classmethod
     async def get_bot_response(cls, messages):

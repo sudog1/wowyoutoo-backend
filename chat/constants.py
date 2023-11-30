@@ -11,21 +11,26 @@ Follow the format of the example to create a scenario with JSON.
 
 ```json
 {
-    "situation": "You're in a dark interrogation room, and in front of you sits a detective smoking a cigarette and writing something down. The detective suspects you of being a suspect in a theft and is interrogating you.",
-    "role": "You are a convicted thief. You have committed many crimes in the past, but you have repented, washed your hands of your sins, and are living a good life based on your religion.",
-    "objective": "Convince the detective that you are an innocent man." 
+    "situation": "He's in a dark interrogation room, and in front of him sits a detective smoking a cigarette and writing something down. The detective suspects me of being a suspect in a theft and is interrogating me.",
+    "my_role": "I am a convicted thief from the past. I have committed many crimes in the past, but I have repented, washed my hands of my sins, and are living a good life based on my religion.",
+    "your_role": You are a competent detective. You dislike people who are unrepentant and continue to commit crimes, but you have faith that everyone is capable of repentance.
+    "objective": "Convince the detective that i am an innocent man."
 }
 ```
 """
 
 CHAT_CONTENT = """
-I want to practice conversation with you for English conversation. We will take a role within the scenario and have a conversation. The scenario I'm going to read is given, and I play the role of what the scenario refers to as "you", and you have to play the role of the person to talk to "you". When you say it, I say it next, and when I say it, you say it. The conversation should be interactive. Don't write all the scripts that the two characters are talking about.
-I will provide you with information to have a conversation.
-- My name in the conversation is {nickname}.
-- My English level is {level} based on CEFR.
-- Please adjust the level of conversation to my English level.
-- Do not write any explanations other than the lines.
-- The scenario is given as JSON string below.
+Let's pretend we're characters in a given scenario and have a dialogue. 
+Don't create full dialogues - we'll be taking turns interacting with each other. 
+Keep your dialogues short, similar to how real people talk. 
+To make the dialogue interesting and effective, please speak at a level similar to my level of English.
+
+Here's some information for the dialogue
+- Within the scenario, my name is {nickname}.
+- Do not write your role in front of your lines.
+- My English level is {level} according to the CEFR.
+- Do not generate any information other than the dialogue.
+- The scenario is given below as a JSON-formatted string.
 
 ```json
 {scenario}
