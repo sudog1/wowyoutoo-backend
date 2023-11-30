@@ -12,7 +12,7 @@ class ReadingQuiz(models.Model):
     title = models.CharField(max_length=100)
     paragraph = models.TextField()
     question = models.CharField(max_length=255)
-    answers = models.JSONField()
+    options = models.JSONField()
     solution = models.IntegerField(
         validators=[
             MinValueValidator(0),

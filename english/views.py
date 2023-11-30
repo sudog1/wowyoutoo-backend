@@ -36,7 +36,7 @@ class ReadingView(APIView):
     def get(self, request):
         try:
             quizzes = list(ReadingQuiz.objects.order_by("?")[:READING_QUIZ_COUNT])
-            
+
             serializer = ReadingQuizSerializer(quizzes, many=True)
             # if serializer.is_valid():
             #     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -62,10 +62,9 @@ class ReadingView(APIView):
             model="gpt-3.5-turbo-1106",
             response_format={"type": "json_object"},
             messages=[
-                {"role": "system", "content": CONTENT},
+                {"role": "system", "content": CONTENT.format("B1")},
             ],
-            temperature=1.5,
-            max_tokens=500,
+            temperature=1,
         )
 
         data = json.loads(response.choices[0].message.content)
@@ -109,15 +108,13 @@ class ReadingBookView(APIView):
                 )
 
     def post(self, request, quiz_id):
-        
         # 복습노트에 저장
         select = request.data.get("select")
-        
+
         user = request.user
         quiz = get_object_or_404(ReadingQuiz, pk=quiz_id)
-        
+
         if quiz not in user.reading_quizzes.all():
-            
             user.reading_quizzes.add(quiz, through_defaults={"index": select})
             return Response({"message": "저장 완료"}, status=status.HTTP_200_OK)
         else:
