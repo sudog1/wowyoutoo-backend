@@ -20,7 +20,7 @@ class Qna(models.Model):
         ("point","point"),
         ("etc", "etc"),
     )
-    author=models.ForeignKey(AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='faqs')
+    author=models.ForeignKey(AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='qnas')
     title=models.CharField(max_length=64)
     content=models.TextField()
     is_private=models.BooleanField(default=False)
@@ -29,7 +29,7 @@ class Qna(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
     image=models.ImageField(
-        upload_to="media/service/faq",
+        upload_to="media/service/qna",
         blank=True,
         null=True,
     )
@@ -40,7 +40,7 @@ class QnaResponse(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
     image=models.ImageField(
-        upload_to="media/service/faq",
+        upload_to="media/service/qna",
         blank=True,
         null=True,
     )
