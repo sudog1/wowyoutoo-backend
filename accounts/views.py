@@ -13,13 +13,13 @@ from django.http import HttpResponseRedirect
 from rest_framework.permissions import AllowAny
 from django.shortcuts import redirect
 from json import JSONDecodeError
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 import requests
 from rest_framework import status, permissions
 import os
 from rest_framework import status
 
-from config.settings import REDIRECT_URL
+from config.settings import EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL
 from .models import User
 from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.providers.kakao import views as kakao_view
@@ -157,7 +157,7 @@ class ConfirmEmailView(APIView):
         print(self)
         # URL에서 추출한 이메일 확인 키를 사용하여 EmailConfirmationHMAC.from_key를 호출하여 이메일 확인 객체를 가져옴
         key = self.kwargs["key"]
-        email_confirmation = EmailConfirmationHMAC.from_key(key)
+        email_confirmation = EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL.from_key(key)
         if not email_confirmation:
             if queryset is None:
                 queryset = self.get_queryset()

@@ -8,5 +8,6 @@ urlpatterns = [
     path("qna/",views.QnaView.as_view(),name='faq'),
     path('qna/<int:qna_id>/',views.QnaView.as_view(),name='faq_detail'),
     path("qna/<int:qna_id>/response/",views.QnaResponseView.as_view(),name='faq_response'),
-    path("ad_mail/",views.BackOfficeView.as_view(),name="admail"),
+    path("backoffice/",views.BackOfficeView.as_view(),name="admail"),
+
 ]

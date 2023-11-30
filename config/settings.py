@@ -9,6 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG", 1)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+DEEPL_API_KEY = os.getenv("DEEPL_API_KEY")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     "accounts",
     "english",
     "service",
+    "payments",
 ]
 
 
