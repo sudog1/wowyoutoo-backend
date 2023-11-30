@@ -7,10 +7,12 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.exceptions import ObjectDoesNotExist
 
 from openai import AsyncOpenAI
-from config.settings import OPENAI_API_KEY
-from collections import deque
+from config.settings import DEEPL_API_KEY, OPENAI_API_KEY
+import deepl
 
 client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+
+translator = deepl.Translator(DEEPL_API_KEY)
 
 
 class ChatBotConsumer(AsyncWebsocketConsumer):
@@ -18,7 +20,8 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
         user = self.scope["user"]
         await self.accept()
         # 채팅을 가져오거나 생성
-        self.chatlog = await AIChatLog.objects.aget_or_create(user=user)
+        chatlog_tuple = await AIChatLog.objects.aget_or_create(user=user)
+        self.chatlog = chatlog_tuple[0]
         # 채팅 진행중
         if self.chatlog.ongoing:
             scenario = self.chatlog.scenario
@@ -38,13 +41,16 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
             messages = [
                 {
                     "role": "system",
-                    "content": CHAT_CONTENT.format(user.nickname, "B1", scenario),
+                    "content": CHAT_CONTENT.format(
+                        nickname=user.nickname, level="B1", scenario=scenario
+                    ),
                 },
             ]
             self.chatlog.ongoing = True
             self.chatlog.scenario = scenario
-            self.chatlog.messags = messages
+            self.chatlog.messages = messages
 
+        await self.send(text_data=scenario)
         # 대화를 시작했거나 마지막에 유저가 답한 경우
         if messages[-1]["role"] != "assistant":
             bot_res = await ChatBotConsumer.get_bot_response(messages)
@@ -54,12 +60,12 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
                     "content": bot_res.content,
                 }
             )
-        await self.send(
-            text_data=json.dumps({"scenario": scenario, "messages": messages})
-        )
+        await self.send(text_data=json.dumps(messages[1:]))
 
     async def disconnect(self, close_code):
-        self.chatlog.save()
+        if close_code == 1000:
+            self.chatlog.ongoing = False
+        await self.chatlog.asave()
 
     async def receive(self, text_data):
         messages = self.chatlog.messages
@@ -80,12 +86,15 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
 
         await self.send(
             text_data=json.dumps(
-                {
-                    "role": bot_res.role,
-                    "content": bot_res.content,
-                }
+                [
+                    {
+                        "role": bot_res.role,
+                        "content": bot_res.content,
+                    }
+                ]
             )
         )
+        print(messages)
 
     @classmethod
     async def get_bot_response(cls, messages):

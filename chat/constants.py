@@ -11,21 +11,28 @@ Follow the format of the example to create a scenario with JSON.
 
 ```json
 {
-    "situation": "You're in a dark interrogation room, and in front of you sits a detective smoking a cigarette and writing something down. The detective suspects you of being a suspect in a theft and is interrogating you.",
-    "role": "You are a convicted thief. You have committed many crimes in the past, but you have repented, washed your hands of your sins, and are living a good life based on your religion.",
-    "objective": "Convince the detective that you are an innocent man." 
+    "situation": "He's in a dark interrogation room, and in front of him sits a detective smoking a cigarette and writing something down. The detective suspects me of being a suspect in a theft and is interrogating me.",
+    "my_role": "I am a convicted thief from the past. I have committed many crimes in the past, but I have repented, washed my hands of my sins, and are living a good life based on my religion.",
+    "your_role": You are a competent detective. You dislike people who are unrepentant and continue to commit crimes, but you have faith that everyone is capable of repentance.
+    "objective": "Convince the detective that i am an innocent man."
 }
 ```
 """
 
 CHAT_CONTENT = """
-the following scenario is written from your perspective. In other words, “You” in the scenario refers to me. 
-You take on the role of the person I am talking to. my name is {0}. My CEFR level is {1}.
-Let's start a dialogue appropriately for my level to improve my conversation skills.
-the dialogue is based on the scenario.
-the scenario are provided as strings in JSON format.
+Let's pretend we're characters in a given scenario and have a dialogue. 
+Don't create full dialogues - we'll be taking turns interacting with each other. 
+Keep your dialogues short, similar to how real people talk. 
+To make the dialogue interesting and effective, please speak at a level similar to my level of English.
+
+Here's some information for the dialogue
+- Within the scenario, my name is {nickname}.
+- Do not write your role in front of your lines.
+- My English level is {level} according to the CEFR.
+- Do not generate any information other than the dialogue.
+- The scenario is given below as a JSON-formatted string.
 
 ```json
-{2}
+{scenario}
 ```
 """
