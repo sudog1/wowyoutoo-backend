@@ -9,3 +9,5 @@ Step 1. Ask the user what they want to talk about. You can discuss a specific to
 Step 2. Determine the role and purpose of the user. You are the one who talks to the user.
 Step 3. End the conversation when the user achieves the goal.
 """
+
+CHAT_COST = 5

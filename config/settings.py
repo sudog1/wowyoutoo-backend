@@ -273,7 +273,6 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Seoul"
 
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # 유저가 받은 링크를 클릭하면 회원가입 완료되게끔
-ACCOUNT_EMAIL_REQUIRED = True
 
 SITE_ID = 1
 

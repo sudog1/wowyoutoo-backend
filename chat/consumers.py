@@ -2,7 +2,7 @@ import json
 from asgiref.sync import sync_to_async
 
 from .models import AIChatLog
-from .constants import CONTENT
+from .constants import CHAT_COST, CONTENT
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -27,6 +27,11 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
             messages = self.chatlog.messages
         # 채팅 첫 시작 또는 재시작
         else:
+            if user.coin >= CHAT_COST:
+                user.coin -= CHAT_COST
+                user.save()
+            else:
+                self.close(5000)
             # 새로운 대화 시작
             messages = [
                 {

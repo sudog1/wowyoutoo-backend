@@ -6,6 +6,7 @@ from .models import ReadingQuiz, Select
 from rest_framework import status
 from .constants import (
     CONTENT,
+    READING_COST,
     READING_QUIZ_COUNT,
     CORRECT_WORDS_COUNT,
     WRONG_WORDS_PER_QUIZ,
@@ -58,7 +59,15 @@ class ReadingView(APIView):
             user.reading_nums += 1
             user.save()
             return Response(status=status.HTTP_200_OK)
-        response = client.chat.completions.create(
+        user = request.user
+        if user.coin >= READING_COST:
+            user.coin -= READING_COST
+            user.save()
+        else:
+            return Response(
+                {"detail": "결제 필요"}, status=status.HTTP_402_PAYMENT_REQUIRED
+            )
+        response = await client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             response_format={"type": "json_object"},
             messages=[
@@ -85,14 +94,9 @@ class ReadingBookView(APIView):
             user = request.user
             select = get_object_or_404(Select, user=user, reading_quiz=quiz)
             serializer = ReadingQuizSerializer(quiz)
-            if serializer.is_valid():
-                data = serializer.data
-                data["select"] = select.index
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                return Response(
-                    serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+            data = serializer.data
+            data["select"] = select.index
+            return Response(data, status=status.HTTP_200_OK)
         # 복습노트의 독해문제 리스트
         else:
             user = request.user

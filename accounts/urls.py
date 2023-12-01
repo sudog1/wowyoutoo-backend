@@ -15,6 +15,7 @@ urlpatterns = [
     path("login/", views.HomeView.as_view(), name="home"),
     path("signup/", views.CustomRegisterView.as_view(), name="signup"),  # 회원가입
     path("dj-rest-auth/", include("dj_rest_auth.urls")),  # 로그인
+    path("tos/", views.TermsOfService.as_view(), name="terms_of_service"),  # 약관 동의
     re_path(
         r"^account-confirm-email/$",
         VerifyEmailView.as_view(),

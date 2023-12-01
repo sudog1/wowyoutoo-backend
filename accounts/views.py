@@ -43,6 +43,16 @@ from django.db import models
 from django.db.models import F
 
 
+class TermsOfService(APIView):
+    def post(self, request):
+        user = request.user
+        is_agree = request.data.get("is_agree")
+        if is_agree:
+            user.agree_terms = True
+            user.save()
+        return Response(status=status.HTTP_200_OK)
+
+
 class ProfileView(APIView):
     def get(self, request, user_id):
         profile = get_object_or_404(User, id=user_id)
