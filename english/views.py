@@ -31,6 +31,7 @@ from deep_translator import (
     DeeplTranslator,
 )
 from django.db import IntegrityError
+import random
 
 from openai import AsyncOpenAI
 from config.settings import OPENAI_API_KEY
@@ -57,6 +58,7 @@ class CreateReadingView(APIView):
             messages=[
                 {"role": "system", "content": CONTENT},
             ],
+            seed=random.randrange(2147483647),
             temperature=1,
         )
         data = json.loads(response.choices[0].message.content)

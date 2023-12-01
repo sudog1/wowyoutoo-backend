@@ -4,13 +4,7 @@ Follow these steps to create a reading comprehension quiz.
 My CEFR level is B1. Please create it appropriately for my level.
 
 Step 1. Choose a random topic
-Choose a random topic from a variety of fields. For example, here are some possible topics, but there are others as well. You need to generate the topics randomly.
-
-- Scientific Facts: A brief explanation about a recent scientific discovery or phenomenon.
-- Historical Events: A short description of a significant historical event or figure.
-- Cultural Issues: A concise introduction to a cultural aspect like art, music, or cinema.
-- Social Problems: A brief overview of a societal issue that impacts mainstream culture.
-- Natural Phenomena: A simple explanation of an intriguing natural occurrence.
+Choose a random topic from a variety of fields. You need to generate the topics randomly.
 
 Step 2. Write a title and paragraph
 Write a short paragraph based on the topic you've chosen. You'll also need to write a suitable title for your paragraph.
