@@ -52,7 +52,7 @@ class ReadingView(APIView):
             )
 
     # 독해문제 생성
-    async def post(self, request, quiz_id=None):
+    def post(self, request, quiz_id=None):
         # 푼 독해문제 카운트
         if quiz_id:
             user = request.user
@@ -67,7 +67,7 @@ class ReadingView(APIView):
             return Response(
                 {"detail": "결제 필요"}, status=status.HTTP_402_PAYMENT_REQUIRED
             )
-        response = await client.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             response_format={"type": "json_object"},
             messages=[
@@ -136,7 +136,7 @@ class ReadingBookView(APIView):
 
 class WordView(APIView):
     # 단어 퀴즈 보기
-    async def get(self, request):
+    def get(self, request):
         try:
             # Word 전체 리스트를 랜덤하게 정렬한 뒤 40개 가져오기
             words_count = request.data.get("words_count", CORRECT_WORDS_COUNT)
