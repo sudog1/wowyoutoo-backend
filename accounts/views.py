@@ -47,9 +47,8 @@ class TermsOfService(APIView):
     def post(self, request):
         user = request.user
         is_agree = request.data.get("is_agree")
-        if is_agree:
-            user.agree_terms = True
-            user.save()
+        user.agree_terms = is_agree
+        user.save()
         return Response(status=status.HTTP_200_OK)
 
 

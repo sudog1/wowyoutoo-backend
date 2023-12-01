@@ -255,7 +255,8 @@ MEDIA_URL = "/media/"
 # OAuth 리다이렉트 url
 REDIRECT_URL = os.getenv("REDIRECT_URL")
 
-EMAIL_DOMAIN = "wowyoutoo.me"
+DOMAIN = "api.wowyoutoo.me"
+EMAIL_DOMAIN = "api.wowyoutoo.me"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"  # 메일 호스트 서버
@@ -293,7 +294,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION")
 
 EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = (
-    "https://api.wowyoutoo.me"  # 사이트와 관련한 자동응답을 받을 이메일 주소,'webmaster@localhost'
+    "/"  # 사이트와 관련한 자동응답을 받을 이메일 주소,'webmaster@localhost'
 )
 
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
