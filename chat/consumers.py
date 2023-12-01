@@ -29,7 +29,7 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
         else:
             if user.coin >= CHAT_COST:
                 user.coin -= CHAT_COST
-                user.save()
+                await user.asave()
             else:
                 self.close(5000)
             # 새로운 대화 시작
