@@ -12,6 +12,8 @@ class Command(BaseCommand):
 
     # 실제로 command가 실행되는 부분
     def handle(self, *args, **kwargs):
+        if Word.objects.exists():
+            return
         csv_file = kwargs["csv_file"]
         data_to_insert = []
 
