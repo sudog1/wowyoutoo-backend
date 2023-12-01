@@ -255,6 +255,7 @@ MEDIA_URL = "/media/"
 # OAuth 리다이렉트 url
 REDIRECT_URL = os.getenv("REDIRECT_URL")
 
+EMAIL_AUTH_URL_PREFIX = "https://wowyoutoo.me"
 DOMAIN = "api.wowyoutoo.me"
 EMAIL_DOMAIN = "api.wowyoutoo.me"
 URL_FRONT = "https://wowyoutoo.me"
