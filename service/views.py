@@ -8,6 +8,7 @@ from .serializers import (
     AnnoncementSerializer,
     QnaListSerializer,
     QnaSerializer,
+    QnaCreateSerializer,
     QnaResponseSerializer,
     AdMailSerializer,
 )
@@ -21,7 +22,7 @@ from accounts.models import User
 
 # Create your views here.
 class AnnouncementView(APIView):
-    permission_classes = [ReadOnlyPermission]  # 운영자만 post,put,delete가능
+    permission_classes = [ReadOnlyPermission] 
 
     def get(self, request, announcement_id=None):
         if announcement_id == None:
@@ -31,9 +32,12 @@ class AnnouncementView(APIView):
         else:
             announcement = get_object_or_404(Announcement, pk=announcement_id)
             serializer = AnnoncementSerializer(announcement)
+            print(serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        if request.user.is_admin!=True:
+            return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
         serializer = AnnoncementSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -42,6 +46,8 @@ class AnnouncementView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, announcement_id):
+        if request.user.is_admin!=True:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         announcement = get_object_or_404(Announcement, pk=announcement_id)
         serializer = AnnoncementSerializer(
             announcement, data=request.data, partial=True
@@ -53,15 +59,16 @@ class AnnouncementView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, announcement_id):
+        if request.user.is_admin!=True:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         announcement = get_object_or_404(Announcement, pk=announcement_id)
         announcement.delete()
         return Response({"detail": "삭제되었습니다"}, status=status.HTTP_200_OK)
 
 
 class QnaView(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = PostPageNumberPagination
-
+    permission_classes=[permissions.IsAuthenticatedOrReadOnly]
     def get_paginated_response(self, data):
         assert self.paginator is not None
         return self.paginator.get_paginated_response(data)
@@ -81,7 +88,9 @@ class QnaView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             qna = get_object_or_404(Qna.objects.select_related("author"), pk=qna_id)
-            if qna.is_private == True:
+            if hasattr(request.user, "is_admin"):
+                pass
+            elif qna.is_private == True and request.user!=qna.author:
                 return Response(
                     {"message": "권한이없습니다"}, status=status.HTTP_403_FORBIDDEN
                 )
@@ -89,7 +98,7 @@ class QnaView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = QnaSerializer(data=request.data)
+        serializer = QnaCreateSerializer(data=request.data)
         if serializer.is_valid():
             user = request.user
             serializer.save(author=user)
@@ -99,7 +108,7 @@ class QnaView(APIView):
 
     def put(self, request, qna_id):
         qna = get_object_or_404(Qna, pk=qna_id)
-        serializer = QnaSerializer(qna, data=request.data, partial=True)
+        serializer = QnaCreateSerializer(qna, data=request.data, partial=True)
         if request.user != qna.author:
             return Response({"message": "권한이없습니다"}, status=status.HTTP_403_FORBIDDEN)
         if serializer.is_valid():
@@ -109,7 +118,7 @@ class QnaView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, qna_id):
-        qna = get_object_or_404(Announcement, pk=qna_id)
+        qna = get_object_or_404(Qna, pk=qna_id)
         if request.user != qna.author:
             return Response({"message": "권한이없습니다"}, status=status.HTTP_403_FORBIDDEN)
         qna.delete()
@@ -117,25 +126,19 @@ class QnaView(APIView):
 
 
 class QnaResponseView(APIView):
-    permission_classes = [ReadOnlyPermission]  #
-
+    permission_classes = [ReadOnlyPermission] 
     def get(self, request, qna_id):
         qna = get_object_or_404(Qna.objects.select_related("author"), pk=qna_id)
-        if qna.is_private == True and (
-            request.user != qna.author
-        ):  # is_private이 true면 자기와 운영자만 볼수있음
-            if request.user.is_admin:
-                pass
-            else:
-                return Response(
-                    {"message": "권한이없습니다"}, status=status.HTTP_403_FORBIDDEN
-                )
+        if qna.is_private == True and request.user!=qna.author:
+            return Response({"message": "권한이없습니다"}, status=status.HTTP_403_FORBIDDEN)
         qna_response = get_object_or_404(QnaResponse, qna_id=qna_id)
         serializer = QnaResponseSerializer(qna_response)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, qna_id):
-        qna = get_object_or_404(Qna, pk=qna_id)
+        if request.user.is_admin!=True:
+            return Response({"message": "권한이없습니다"}, status=status.HTTP_403_FORBIDDEN)
+        qna=Qna.objects.get(pk=qna_id)
         serializer = QnaResponseSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(qna=qna)
@@ -143,18 +146,22 @@ class QnaResponseView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, reques, qna_id):
-        qna_response = get_object_or_404(QnaResponse, pk=qna_id)
+    def delete(self, request, qna_id):
+        if request.user.is_admin!=True:
+            return Response({"message": "권한이없습니다"}, status=status.HTTP_403_FORBIDDEN)
+        qna_response = get_object_or_404(QnaResponse, qna_id=qna_id)
         qna_response.delete()
         return Response({"detail": "삭제되었습니다"}, status=status.HTTP_200_OK)
 
     def put(self, request, qna_id):
-        qna_response = get_object_or_404(QnaResponse, pk=qna_id)
+        if request.user.is_admin!=True:
+            return Response({"message": "권한이없습니다"}, status=status.HTTP_403_FORBIDDEN)
+        qna_response = get_object_or_404(QnaResponse, qna_id=qna_id)
         serializer = QnaResponseSerializer(
             qna_response, data=request.data, partial=True
         )
         if serializer.is_valid():
-            serializer.save(qna=qna_id)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -169,7 +176,6 @@ class BackOfficeView(APIView):
     def post(self, request):
         email_list = list(
             User.objects.filter(verified=True)
-            .only("email")
             .values_list("email", flat=True)
         )  # flat을 사용하지않으면 리스트에 튜플이 담겨나옵니다
         serializer = AdMailSerializer(data=request.data)

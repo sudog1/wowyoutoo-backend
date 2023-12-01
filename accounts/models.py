@@ -57,7 +57,7 @@ class User(AbstractBaseUser):
     agree_terms = models.BooleanField("서비스 이용약관 동의", default=False, null=True)
     reading_nums = models.PositiveIntegerField(default=0)
     word_nums = models.PositiveIntegerField(default=0)
-    coin = models.SmallIntegerField(default=30)
+    coin = models.SmallIntegerField(default=100)
     # social_login = models.BooleanField(default=True)
 
     objects = UserManager()
