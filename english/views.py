@@ -62,7 +62,7 @@ class ReadingView(APIView):
             model="gpt-3.5-turbo-1106",
             response_format={"type": "json_object"},
             messages=[
-                {"role": "system", "content": CONTENT.format("B1")},
+                {"role": "system", "content": CONTENT},
             ],
             temperature=1,
         )
