@@ -23,7 +23,7 @@ IMP_SECRET = os.getenv("IMP_SECRET")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-ALLOWED_HOSTS = ["daphne"]
+ALLOWED_HOSTS = ["api.wowyoutoo.me"]
 
 # CORS_ALLOW_ALL_ORIGINS = True
 
