@@ -19,7 +19,13 @@ from rest_framework import status, permissions
 import os
 from rest_framework import status
 
-from config.settings import EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL
+from config.settings import (
+    EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL,
+    KAKAO_REST_API_KEY,
+    REDIRECT_URL,
+    SOCIAL_AUTH_GITHUB_CLIENT_ID,
+    SOCIAL_AUTH_GITHUB_SECRET,
+)
 from .models import User
 from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.providers.kakao import views as kakao_view
@@ -194,8 +200,7 @@ class Token_Test(APIView):
 
 class KakaoLogin(APIView):
     def post(self, request):
-        state = os.getenv("STATE")
-        client_id = os.getenv("KAKAO_REST_API_KEY")
+        client_id = KAKAO_REST_API_KEY
 
         received_code = request.data.get("code")  # 받은 ?code='' 값
         code_value = received_code.split("?code=")[-1]  # 코드 값만 추출
@@ -294,9 +299,8 @@ class KakaoLogin(APIView):
 
 class GithubLogin(APIView):
     def post(self, request):
-        state = os.getenv("STATE")
-        client_id = os.getenv("SOCIAL_AUTH_GITHUB_CLIENT_ID")
-        client_secret = os.getenv("SOCIAL_AUTH_GITHUB_SECRET")
+        client_id = SOCIAL_AUTH_GITHUB_CLIENT_ID
+        client_secret = SOCIAL_AUTH_GITHUB_SECRET
 
         received_code = request.data.get("code")
         code_value = received_code.split("?code=")[-1]
