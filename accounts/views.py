@@ -157,36 +157,38 @@ class HomeView(APIView):
 """
 
 
+from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
+from django.http import HttpResponseRedirect
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+
+
 class ConfirmEmailView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, *args, **kwargs):
-        print(self)
-        # 사용자가 이메일 확인 링크로 GET 요청을 보낼 때 실행되는 메서드
         self.object = confirmation = self.get_object()
-        confirmation.confirm(self.request)
-        return HttpResponseRedirect("accounts/")  # 인증실패  # 인증성공
-        # 이메일 확인 객체를 가져오고, 해당 객체의 confirm 메서드를 호출하여 이메일을 확인
+        if confirmation:
+            confirmation.confirm(self.request)
+            return HttpResponseRedirect("https://api.wowyoutoo.me/accounts/")
+        else:
+            return HttpResponseRedirect("https://api.wowyoutoo.me/accounts/")
 
     def get_object(self, queryset=None):
-        print(self)
-        # URL에서 추출한 이메일 확인 키를 사용하여 EmailConfirmationHMAC.from_key를 호출하여 이메일 확인 객체를 가져옴
         key = self.kwargs["key"]
-        email_confirmation = EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL.from_key(key)
+        email_confirmation = EmailConfirmationHMAC.from_key(key)
         if not email_confirmation:
             if queryset is None:
                 queryset = self.get_queryset()
             try:
                 email_confirmation = queryset.get(key=key.lower())
             except EmailConfirmation.DoesNotExist:
-                return HttpResponseRedirect("accounts/")  # 인증실패 # 인증실패
+                return None
         return email_confirmation
 
     def get_queryset(self):
         qs = EmailConfirmation.objects.all_valid()
-        # 모든 유효한 이메일 확인 객체를 반환하는 쿼리셋을 정의
         qs = qs.select_related("email_address__user")
-        # 연결된 이메일 주소 및 사용자 정보를 함께 가져움
         return qs
 
 

@@ -31,7 +31,7 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
                 user.coin -= CHAT_COST
                 await user.asave()
             else:
-                await self.close(5000)
+                await self.close(code=5000)
             # 새로운 대화 시작
             messages = [
                 {
