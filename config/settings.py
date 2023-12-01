@@ -293,7 +293,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION")
 
 EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = (
-    "/"  # 사이트와 관련한 자동응답을 받을 이메일 주소,'webmaster@localhost'
+    "https://api.wowyoutoo.me"  # 사이트와 관련한 자동응답을 받을 이메일 주소,'webmaster@localhost'
 )
 
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
