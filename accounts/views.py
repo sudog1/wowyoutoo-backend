@@ -212,7 +212,7 @@ class KakaoLogin(APIView):
             data={
                 "grant_type": "authorization_code",
                 "client_id": client_id,
-                "redirect_uri": REDIRECT_URL,
+                "redirect_uri": f"{REDIRECT_URL}/redirect.html",
                 "code": code_value,
             },
         )
@@ -312,7 +312,7 @@ class GithubLogin(APIView):
             data={
                 "client_id": client_id,
                 "client_secret": client_secret,
-                "redirect_url": REDIRECT_URL,
+                "redirect_url": f"{REDIRECT_URL}/redirectGit.html",
                 "code": code_value,
             },
         )
