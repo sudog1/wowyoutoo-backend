@@ -171,6 +171,7 @@ class CartView(APIView):
 
 # 결제 전 검증을 위한 주문번호, 결제 예정 금액 DB 저장
 class PrepareView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         # 현재 user의 장바구니 상품들 모두 가져옴
         items = CartItem.objects.filter(user=request.user)
@@ -210,6 +211,8 @@ class PrepareView(APIView):
 
 # 결제 후 검증
 class CompleteView(APIView):
+    permission_classes = [IsAuthenticated]
+    
     BASE_DIR = Path(__file__).resolve().parent.parent
     # env = environ.Env()
     # env.read_env(BASE_DIR / ".env")
