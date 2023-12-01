@@ -2,7 +2,7 @@ import json
 from asgiref.sync import sync_to_async
 
 from .models import AIChatLog
-from .constants import CONTENT, TOKEN_LIMIT
+from .constants import CONTENT
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.exceptions import ObjectDoesNotExist
 
