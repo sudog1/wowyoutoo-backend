@@ -1,6 +1,5 @@
 from django.db import models
 from config.settings import AUTH_USER_MODEL
-from english.models import Level
 
 
 # Create your models here.

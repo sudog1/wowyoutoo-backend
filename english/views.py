@@ -12,7 +12,7 @@ from .constants import (
 )
 import json
 from django.db.models import F
-from .models import Word, ReadingQuiz, Level, Select
+from .models import Word, ReadingQuiz, Select
 from .serializers import (
     MyWordSerializer,
     ReadingQuizListSerializer,
@@ -66,16 +66,14 @@ class ReadingView(APIView):
             ],
             temperature=1,
         )
-
         data = json.loads(response.choices[0].message.content)
         serializer = ReadingQuizSerializer(data=data)
-        level = Level.objects.get(step="B1")
 
         if serializer.is_valid():
-            serializer.save(level=level)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response({"detail": "생성 실패"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
 
 
 # 유저의 복습노트 관련 뷰
@@ -229,25 +227,3 @@ class WordsBookView(APIView):
             words.remove(word)
             return Response({"message": "제거되었습니다."}, status=status.HTTP_200_OK)
         return Response({"message": "단어가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# class DialogueView(APIView):
-#     def post(self, request):
-#         scenario_id = request.data["scenarioId"]
-#         scenario = get_object_or_404(Scenario, scenario_id)
-#         content = f"""
-#             Write a single dialogue between a(an) {scenario.you} and {scenario.me} who {scenario.action}.
-#             You are a(an) {scenario.you} and I am a(an) {scenario.me}.
-#             Please write a short one dialogue containing 5 conversations.
-#             Please write a dialogue using A2 level words.
-#         """
-#         response = openai.ChatCompletion.create(
-#             model="gpt-3.5-turbo",
-#             provider=openai.Provider.GptGo,
-#             messages=[
-#                 {"role": "system", "content": content},
-#             ],
-#             stream=True,
-#         )
-#         for message in response:
-#             print(message)
