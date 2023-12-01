@@ -10,4 +10,4 @@ Step 2. Determine the role and purpose of the user. You are the one who talks to
 Step 3. End the conversation when the user achieves the goal.
 """
 
-CHAT_COST = 5
+CHAT_COST = 3
