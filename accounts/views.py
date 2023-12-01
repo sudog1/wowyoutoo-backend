@@ -194,8 +194,8 @@ class Token_Test(APIView):
 
 class KakaoLogin(APIView):
     def post(self, request):
-        state = os.environ.get("STATE")
-        client_id = os.environ.get("KAKAO_REST_API_KEY")
+        state = os.getenv("STATE")
+        client_id = os.getenv("KAKAO_REST_API_KEY")
 
         received_code = request.data.get("code")  # 받은 ?code='' 값
         code_value = received_code.split("?code=")[-1]  # 코드 값만 추출
@@ -294,9 +294,9 @@ class KakaoLogin(APIView):
 
 class GithubLogin(APIView):
     def post(self, request):
-        state = os.environ.get("STATE")
-        client_id = os.environ.get("SOCIAL_AUTH_GITHUB_CLIENT_ID")
-        client_secret = os.environ.get("SOCIAL_AUTH_GITHUB_SECRET")
+        state = os.getenv("STATE")
+        client_id = os.getenv("SOCIAL_AUTH_GITHUB_CLIENT_ID")
+        client_secret = os.getenv("SOCIAL_AUTH_GITHUB_SECRET")
 
         received_code = request.data.get("code")
         code_value = received_code.split("?code=")[-1]

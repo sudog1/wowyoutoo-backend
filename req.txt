@@ -29,7 +29,6 @@ constantly==23.10.4
 cryptography==41.0.5
 daphne==4.0.0
 deep-translator==1.11.4
-deepl==1.16.1
 defusedxml==0.7.1
 distlib==0.3.7
 distro==1.8.0
@@ -108,6 +107,7 @@ tqdm==4.66.1
 trio==0.23.1
 trio-websocket==0.11.1
 Twisted==23.10.0
+twisted-iocpsupport==1.0.4
 txaio==23.1.1
 typing_extensions==4.8.0
 tzdata==2023.3
