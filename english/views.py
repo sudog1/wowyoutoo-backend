@@ -1,6 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    IsAuthenticated,
+    AllowAny,
+)
 from django.shortcuts import get_object_or_404
 from .models import ReadingQuiz, Select
 from rest_framework import status
@@ -26,25 +31,20 @@ from deep_translator import (
     DeeplTranslator,
 )
 
-from openai import AsyncOpenAI
+from openai import OpenAI
 from config.settings import OPENAI_API_KEY
 
-client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 class ReadingView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     # 기존 독해문제 리스트
     def get(self, request):
         try:
             quizzes = list(ReadingQuiz.objects.order_by("?")[:READING_QUIZ_COUNT])
-
             serializer = ReadingQuizSerializer(quizzes, many=True)
-            # if serializer.is_valid():
-            #     return Response(serializer.data, status=status.HTTP_200_OK)
-            # else:
-            #     return Response(
-            #         serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            #     )
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
@@ -87,6 +87,8 @@ class ReadingView(APIView):
 
 # 유저의 복습노트 관련 뷰
 class ReadingBookView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, quiz_id=None):
         # 복습할 독해문제 상세보기
         if quiz_id:
@@ -135,6 +137,8 @@ class ReadingBookView(APIView):
 
 
 class WordView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     # 단어 퀴즈 보기
     def get(self, request):
         try:
@@ -195,6 +199,8 @@ class WordView(APIView):
 
 
 class WordsBookView(APIView):
+    permission_classes = [IsAuthenticated]
+
     # 내 단어장 보기
     def get(self, request):
         user = request.user
