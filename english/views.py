@@ -30,15 +30,50 @@ from deep_translator import (
     GoogleTranslator,
     DeeplTranslator,
 )
+from django.db import IntegrityError
 
-from openai import OpenAI
+from openai import AsyncOpenAI
 from config.settings import OPENAI_API_KEY
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 
+# 지문 생성
 class CreateReadingView(APIView):
-    pass
+    permission_classes = [IsAuthenticated]
+
+    async def post(self, request):
+        user = request.user
+        if user.coin >= READING_COST:
+            user.coin -= READING_COST
+            await user.asave()
+        else:
+            return Response(
+                {"detail": "결제 필요"}, status=status.HTTP_402_PAYMENT_REQUIRED
+            )
+        response = await client.chat.completions.create(
+            model="gpt-3.5-turbo-1106",
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": CONTENT},
+            ],
+            temperature=1,
+        )
+        data = json.loads(response.choices[0].message.content)
+        try:
+            quiz = await ReadingQuiz.objects.acreate(**data)
+            serializer = ReadingQuizSerializer(quiz)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except IntegrityError as e:
+            return Response({"detail": e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # serializer = ReadingQuizSerializer(data=data)
+
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # else:
+        #     return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ReadingView(APIView):
@@ -55,38 +90,12 @@ class ReadingView(APIView):
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    # 독해문제 생성
-    def post(self, request, quiz_id=None):
-        # 푼 독해문제 카운트
-        if quiz_id:
-            user = request.user
-            user.reading_nums += 1
-            user.save()
-            return Response(status=status.HTTP_200_OK)
+    # 푼 독해문제 카운트
+    def post(self, request):
         user = request.user
-        if user.coin >= READING_COST:
-            user.coin -= READING_COST
-            user.save()
-        else:
-            return Response(
-                {"detail": "결제 필요"}, status=status.HTTP_402_PAYMENT_REQUIRED
-            )
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo-1106",
-            response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": CONTENT},
-            ],
-            temperature=1,
-        )
-        data = json.loads(response.choices[0].message.content)
-        serializer = ReadingQuizSerializer(data=data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
+        user.reading_nums += 1
+        user.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 # 유저의 복습노트 관련 뷰
@@ -124,11 +133,9 @@ class ReadingBookView(APIView):
 
         if quiz not in user.reading_quizzes.all():
             user.reading_quizzes.add(quiz, through_defaults={"index": select})
-            return Response({"message": "저장 완료"}, status=status.HTTP_200_OK)
+            return Response({"detail": "저장 완료"}, status=status.HTTP_200_OK)
         else:
-            return Response(
-                {"message": "이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST)
 
     # 복습노트에서 제거
     def delete(self, request, quiz_id):
