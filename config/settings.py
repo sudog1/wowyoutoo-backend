@@ -28,8 +28,8 @@ ALLOWED_HOSTS = ["backend"]
 # CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ORIGIN_WHITELIST = [
-    "https://wowyoutoo.me" "https://www.wowyoutoo.me",
-    "https://api.wowyoutoo.me",
+    "https://wowyoutoo.me",
+    "https://www.wowyoutoo.me",
 ]
 CSRF_TRUSTED_ORIGINS = CORS_ORIGIN_WHITELIST
 
