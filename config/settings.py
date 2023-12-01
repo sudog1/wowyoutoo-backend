@@ -255,6 +255,7 @@ MEDIA_URL = "/media/"
 # OAuth 리다이렉트 url
 REDIRECT_URL = os.getenv("REDIRECT_URL")
 
+EMAIL_DOMAIN = "wowyoutoo.me"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"  # 메일 호스트 서버
