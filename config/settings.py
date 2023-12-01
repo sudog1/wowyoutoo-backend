@@ -2,9 +2,13 @@ from pathlib import Path
 from datetime import timedelta
 import os
 
+# import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# env = environ.Env()
+# environ.Env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG", 1)
