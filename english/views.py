@@ -37,6 +37,10 @@ from config.settings import OPENAI_API_KEY
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 
+class CreateReadingView(APIView):
+    pass
+
+
 class ReadingView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
