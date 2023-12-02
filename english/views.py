@@ -43,7 +43,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 class CreateReadingView(APIView):
     permission_classes = [IsAuthenticated]
 
-    async def post(self, request):
+    def post(self, request):
         user = request.user
         if user.coin >= READING_COST:
             user.coin -= READING_COST
@@ -52,7 +52,7 @@ class CreateReadingView(APIView):
             return Response(
                 {"detail": "결제 필요"}, status=status.HTTP_402_PAYMENT_REQUIRED
             )
-        response = await client.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             response_format={"type": "json_object"},
             messages=[
