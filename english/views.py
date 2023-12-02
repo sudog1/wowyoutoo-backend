@@ -47,7 +47,7 @@ class CreateReadingView(APIView):
         user = request.user
         if user.coin >= READING_COST:
             user.coin -= READING_COST
-            await user.asave()
+            user.save()
         else:
             return Response(
                 {"detail": "결제 필요"}, status=status.HTTP_402_PAYMENT_REQUIRED
@@ -62,20 +62,16 @@ class CreateReadingView(APIView):
             temperature=1,
         )
         data = json.loads(response.choices[0].message.content)
-        try:
-            quiz = await ReadingQuiz.objects.acreate(**data)
-            serializer = ReadingQuizSerializer(quiz)
+
+        serializer = ReadingQuizSerializer(data=data)
+
+        if serializer.is_valid():
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except IntegrityError as e:
-            return Response({"detail": e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        # serializer = ReadingQuizSerializer(data=data)
-
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # else:
-        #     return Response(serializer.error, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(
+                serializer.error, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class ReadingView(APIView):
