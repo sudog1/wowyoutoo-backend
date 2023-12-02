@@ -50,9 +50,9 @@ class TermsOfService(APIView):
         user.agree_terms = is_agree
         user.save()
         if is_agree:
-            return Response({"detail: 약관 동의"}, status=status.HTTP_200_OK)
+            return Response({"detail": "약관 동의"}, status=status.HTTP_200_OK)
         else:
-            return Response({"detail: 약관 거부"}, status=status.HTTP_200_OK)
+            return Response({"detail": "약관 거부"}, status=status.HTTP_200_OK)
 
 
 class ProfileView(APIView):
