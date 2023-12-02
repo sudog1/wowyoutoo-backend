@@ -33,10 +33,10 @@ from deep_translator import (
 from django.db import IntegrityError
 import random
 
-from openai import AsyncOpenAI
+from openai import OpenAI
 from config.settings import OPENAI_API_KEY
 
-client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 # 지문 생성
