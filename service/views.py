@@ -22,7 +22,7 @@ from accounts.models import User
 
 # Create your views here.
 class AnnouncementView(APIView):
-    permission_classes = [ReadOnlyPermission] 
+    permission_classes = [ReadOnlyPermission] #퍼미션이 작동을 안해서 if,else문으로 일단 막아뒀습니다
 
     def get(self, request, announcement_id=None):
         if announcement_id == None:
@@ -128,10 +128,11 @@ class QnaView(APIView):
 class QnaResponseView(APIView):
     permission_classes = [ReadOnlyPermission] 
     def get(self, request, qna_id):
-        qna = get_object_or_404(Qna.objects.select_related("author"), pk=qna_id)
-        if qna.is_private == True and request.user!=qna.author:
+        qna_response = get_object_or_404(QnaResponse.objects.select_related("qna"), qna_id=qna_id)
+        if hasattr(request.user, "is_admin"):
+            pass
+        elif qna_response.qna.is_private == True and request.user!=qna_response.qna.author:
             return Response({"message": "권한이없습니다"}, status=status.HTTP_403_FORBIDDEN)
-        qna_response = get_object_or_404(QnaResponse, qna_id=qna_id)
         serializer = QnaResponseSerializer(qna_response)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -142,6 +143,8 @@ class QnaResponseView(APIView):
         serializer = QnaResponseSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(qna=qna)
+            qna.is_answered=True
+            qna.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
