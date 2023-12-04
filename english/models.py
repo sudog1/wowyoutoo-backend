@@ -4,8 +4,6 @@ from config.settings import AUTH_USER_MODEL
 
 
 # Create your models here.
-class Level(models.Model):
-    step = models.CharField(max_length=10)
 
 
 class ReadingQuiz(models.Model):
@@ -21,9 +19,6 @@ class ReadingQuiz(models.Model):
     )
     explanation = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    level = models.ForeignKey(
-        Level, on_delete=models.PROTECT, related_name="reading_quizzes"
-    )
     users = models.ManyToManyField(
         AUTH_USER_MODEL,
         through="Select",

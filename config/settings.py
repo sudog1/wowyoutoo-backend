@@ -1,33 +1,37 @@
-import environ
 from pathlib import Path
 from datetime import timedelta
 import os
-
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# load env
-env = environ.Env(
-    # set casting, default value
-    DEBUG=(bool, False)
-)
-
-# BASE_DIR은 manage.py가 위치한 디렉토리입니다.
-# .env파일은 BASE_DIR안에 위치해야 합니다.
+env = environ.Env()
 environ.Env.read_env(BASE_DIR / ".env")
 
-SECRET_KEY = env("SECRET_KEY")
-DEBUG = env("DEBUG")
-OPENAI_API_KEY = env("OPENAI_API_KEY")
-DEEPL_API_KEY = env("DEEPL_API_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv("DEBUG", 1)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+DEEPL_API_KEY = os.getenv("DEEPL_API_KEY")
+KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
+SOCIAL_AUTH_GITHUB_CLIENT_ID = os.getenv("SOCIAL_AUTH_GITHUB_CLIENT_ID")
+SOCIAL_AUTH_GITHUB_SECRET = os.getenv("SOCIAL_AUTH_GITHUB_SECRET")
+
+IMP_KEY = os.getenv("IMP_KEY")
+IMP_SECRET = os.getenv("IMP_SECRET")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-ALLOWED_HOSTS = ["*"]
-CORS_ALLOW_ALL_ORIGINS = True
+ALLOWED_HOSTS = ["api.wowyoutoo.me"]
 
+# CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ORIGIN_WHITELIST = [
+    "https://wowyoutoo.me",
+    "https://api.wowyoutoo.me",
+]
+CSRF_TRUSTED_ORIGINS = CORS_ORIGIN_WHITELIST
 
 # Application definition
 
@@ -129,11 +133,12 @@ LOGIN_REDIRECT_URL = "/"
 
 # WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("redis", 6379)],
         },
     },
 }
@@ -142,12 +147,25 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    },
-}
+POSTGRES_DB = os.getenv("POSTGRES_DB", "")
+if POSTGRES_DB:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB"),
+            "USER": os.getenv("POSTGRES_USER"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+            "HOST": os.getenv("POSTGRES_HOST"),
+            "PORT": os.getenv("POSTGRES_PORT"),
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
@@ -199,7 +217,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": False,
     "ALGORITHM": "HS256",
-    "SIGNING_KEY": env("SECRET_KEY"),
+    "SIGNING_KEY": os.getenv("SECRET_KEY"),
     "VERIFYING_KEY": "",
     "AUDIENCE": None,
     "ISSUER": None,
@@ -226,43 +244,39 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+STATICFILES_DIRS = []
+STATIC_ROOT = BASE_DIR / "static"
+STATIC_URL = "/static/"
 
-
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-
-STATIC_URL = "static/"
-
-MEDIAFILES_DIRS = [
-    BASE_DIR / "media",
-]
-
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media').replace('\\', '/')
-
+MEDIAFILES_DIRS = []
+MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
 
+# OAuth 리다이렉트 url
+REDIRECT_URL = os.getenv("REDIRECT_URL")
+
+EMAIL_AUTH_URL_PREFIX = "https://wowyoutoo.me"
+DOMAIN = "https://api.wowyoutoo.me"
+EMAIL_DOMAIN = "https://api.wowyoutoo.me"
+URL_FRONT = "https://wowyoutoo.me"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"  # 메일 호스트 서버
 EMAIL_PORT = "587"  # gmail과 통신하는 포트
-EMAIL_HOST_USER = "danielhochan1@gmail.com"  # 발신할 이메일
-EMAIL_HOST_PASSWORD = "zxpm kdwl iqfl bxnm"  # 발신할 메일의 비밀번호
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")  # 발신할 이메일
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")  # 발신할 메일의 비밀번호
 EMAIL_USE_TLS = True  # TLS 보안 방법
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 사이트와 관련한 자동응답을 받을 이메일 주소
 
-
 CELERY_ALWAYS_EAGER = True
-CELERY_BROKER_URL = "redis://127.0.0.1:6379"  # redis서버의 주소와 다르면 바꾸세요
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379"
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")  # redis서버의 주소와 다르면 바꾸세요
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Seoul"
 
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # 유저가 받은 링크를 클릭하면 회원가입 완료되게끔
-ACCOUNT_EMAIL_REQUIRED = True
 
 SITE_ID = 1
 
@@ -274,15 +288,18 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_UNIQUE_EMAIL = True
 
 # 이메일 인증 사용
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+# ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 
 # 이메일 인증 사용하지 않음
 # ACCOUNT_EMAIL_VERIFICATION = "none"
+
+ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION")
 
 EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = (
     "/"  # 사이트와 관련한 자동응답을 받을 이메일 주소,'webmaster@localhost'
 )
 
+ACCOUNT_EMAIL_CONFIRMATION_BASE_URL = "https://api.wowyoutoo.me"
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
 
 # 이메일에 자동으로 표시되는 사이트 정보

@@ -10,18 +10,15 @@ from django.conf import settings
 @shared_task
 def send_email(email_list, data):
     context = {
-        'content': data["content"],
-        'image_url': "{}/{}".format(settings.DOMAIN,data["image"]),#배포시 도메인이름으로
+        "content": data["content"],
+        "image_url": "{}/{}".format(settings.DOMAIN, data["image"]),  # 배포시 도메인이름으로
     }
 
-    html_mail = render_to_string("email.html",context) 
+    html_mail = render_to_string("email.html", context)
     email = EmailMultiAlternatives(
-        data["title"],  
-        html_mail,  
-        to=email_list,  
-        )
-    email.content_subtype = "html" 
+        data["title"],
+        html_mail,
+        to=email_list,
+    )
+    email.content_subtype = "html"
     email.send()
-
-
-

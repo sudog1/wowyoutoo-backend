@@ -54,10 +54,10 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField("관리자 여부", default=False)
     verified = models.BooleanField(default=False)
-    agree_terms = models.BooleanField("서비스 이용약관 동의", default=False, null=True)
+    agree_terms = models.BooleanField("서비스 이용약관 동의", default=False)
     reading_nums = models.PositiveIntegerField(default=0)
     word_nums = models.PositiveIntegerField(default=0)
-    coin = models.SmallIntegerField(default=100)
+    coin = models.SmallIntegerField(default=30)
     # social_login = models.BooleanField(default=True)
 
     objects = UserManager()
