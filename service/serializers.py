@@ -13,7 +13,7 @@ class AnnoucementListSerializer(serializers.ModelSerializer):
 class QnaListSerializer(serializers.ModelSerializer):
     author=serializers.SerializerMethodField()
     def get_author(self,obj):
-        return {obj.author.username,obj.author.id}
+        return {"nickname":obj.author.nickname,"id":obj.author.id}
     class Meta:
         model=Qna
         fields=["id","title","author","created_at","is_answered","is_private","question_type"]
