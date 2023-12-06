@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
-from config.settings import AUTH_USER_MODEL
+from django.conf import AUTH_USER_MODEL
 
 
 # Create your models here.       
