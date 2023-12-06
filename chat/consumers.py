@@ -1,56 +1,99 @@
 import json
-import g4f as openai
 from asgiref.sync import sync_to_async
-from .constants import content
+
+from .models import AIChatLog
+from .constants import CHAT_COST, CONTENT
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.core.exceptions import ObjectDoesNotExist
+
+from openai import AsyncOpenAI
+from config.settings import DEEPL_API_KEY, OPENAI_API_KEY
+import deepl
+
+client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+
+translator = deepl.Translator(DEEPL_API_KEY)
 
 
 class ChatBotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.messages = [
-            {"role": "system", "content": content},
-        ]
-        bot_msg = await self.get_bot_answer(self.messages)
-        self.messages.append({"role": "assistant", "content": bot_msg})
-
         await self.accept()
-        await self.send(
-            text_data=json.dumps(
+        user = self.scope["user"]
+        # 채팅을 가져오거나 생성
+        chatlog_tuple = await AIChatLog.objects.aget_or_create(user=user)
+        self.chatlog = chatlog_tuple[0]
+        # 채팅 진행중
+        if self.chatlog.ongoing:
+            messages = self.chatlog.messages
+        # 채팅 첫 시작 또는 재시작
+        else:
+            if user.coin >= CHAT_COST:
+                user.coin -= CHAT_COST
+                await user.asave()
+            else:
+                await self.close(code=1011)
+            # 새로운 대화 시작
+            messages = [
                 {
-                    "message": bot_msg,
+                    "role": "system",
+                    "content": CONTENT.format(nickname=user.nickname),
+                },
+            ]
+            self.chatlog.ongoing = True
+            self.chatlog.messages = messages
+        # 대화를 처음 시작하거나 마지막에 유저가 답한 경우
+        if messages[-1]["role"] != "assistant":
+            bot_res = await ChatBotConsumer.get_bot_response(messages)
+            messages.append(
+                {
+                    "role": bot_res.role,
+                    "content": bot_res.content,
                 }
             )
-        )
+        await self.send(text_data=json.dumps(messages[1:]))
 
     async def disconnect(self, close_code):
-        pass
+        if close_code == 1000:
+            self.chatlog.ongoing = False
+        await self.chatlog.asave()
 
     async def receive(self, text_data):
-        user_msg = json.loads(text_data).get("message")
-        self.messages.append({"role": "user", "content": user_msg})
-        bot_msg = await self.get_bot_answer(self.messages)
-        self.messages.append({"role": "assistant", "content": bot_msg})
-
+        messages = self.chatlog.messages
+        user_res = json.loads(text_data)
+        messages.append(
+            {
+                "role": user_res["role"],
+                "content": sync_to_async(
+                    translator.translate_text(user_res["content"], target_lang="en")
+                ),
+            }
+        )
+        bot_res = await ChatBotConsumer.get_bot_response(messages)
+        messages.append(
+            {
+                "role": bot_res.role,
+                "content": bot_res.content,
+            }
+        )
         await self.send(
             text_data=json.dumps(
-                {
-                    "message": bot_msg,
-                }
+                [
+                    {
+                        "role": bot_res.role,
+                        "content": bot_res.content,
+                    }
+                ]
             )
         )
 
     @classmethod
-    @sync_to_async
-    def get_bot_answer(cls, messages):
-        response = openai.ChatCompletion.create(
+    async def get_bot_response(cls, messages):
+        response = await client.chat.completions.create(
             model="gpt-3.5-turbo",
-            provider=openai.Provider.Liaobots,
             messages=messages,
-            temperature=2,
-            finish_reason="length",
-            # stream=True,
+            temperature=0.7,
         )
-        return response
+        return response.choices[0].message
 
 
 # class ChatUserConsumer(AsyncWebsocketConsumer):

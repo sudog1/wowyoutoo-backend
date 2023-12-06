@@ -1,18 +1,24 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    IsAuthenticated,
+    AllowAny,
+)
 from django.shortcuts import get_object_or_404
 from .models import ReadingQuiz, Select
 from rest_framework import status
 from .constants import (
     CONTENT,
+    READING_COST,
     READING_QUIZ_COUNT,
     CORRECT_WORDS_COUNT,
     WRONG_WORDS_PER_QUIZ,
 )
-import g4f as openai
 import json
-from .models import Word, ReadingQuiz, Level
+from django.db.models import F
+from .models import Word, ReadingQuiz, Select
 from .serializers import (
     MyWordSerializer,
     ReadingQuizListSerializer,
@@ -24,52 +30,76 @@ from deep_translator import (
     GoogleTranslator,
     DeeplTranslator,
 )
+from django.db import IntegrityError
+import random
+
+from openai import OpenAI
+from config.settings import OPENAI_API_KEY
+
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+
+# 지문 생성
+class CreateReadingView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        if user.coin >= READING_COST:
+            user.coin -= READING_COST
+            user.save()
+        else:
+            return Response(
+                {"detail": "결제 필요"}, status=status.HTTP_402_PAYMENT_REQUIRED
+            )
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-1106",
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": CONTENT},
+            ],
+            seed=random.randrange(2147483647),
+            temperature=1,
+        )
+        data = json.loads(response.choices[0].message.content)
+
+        serializer = ReadingQuizSerializer(data=data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(
+                serializer.error, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class ReadingView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     # 기존 독해문제 리스트
     def get(self, request):
         try:
             quizzes = list(ReadingQuiz.objects.order_by("?")[:READING_QUIZ_COUNT])
             serializer = ReadingQuizSerializer(quizzes, many=True)
-            if serializer.is_valid():
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response(
-                    serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    # 독해문제 생성
+    # 푼 독해문제 카운트
     def post(self, request):
-        
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            provider=openai.Provider.Liaobots,
-            response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": CONTENT},
-            ],
-            temperature=2,
-            finish_reason="length",
-            # stream=True,
-        )
-        
-        response = json.loads(response)
-        serializer = ReadingQuizSerializer(data=response)
-        level = Level.objects.get(step="C1")
-        if serializer.is_valid():
-            serializer.save(level=level)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"detail": "생성 실패"}, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        user.reading_nums += 1
+        user.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 # 유저의 복습노트 관련 뷰
 class ReadingBookView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, quiz_id=None):
         # 복습할 독해문제 상세보기
         if quiz_id:
@@ -77,22 +107,17 @@ class ReadingBookView(APIView):
             user = request.user
             select = get_object_or_404(Select, user=user, reading_quiz=quiz)
             serializer = ReadingQuizSerializer(quiz)
-            if serializer.is_valid():
-                data = serializer.data
-                data["select"] = select.index
-                return Response(data, status=status.HTTP_200_OK)
-            else:
-                return Response(
-                    serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+            data = serializer.data
+            data["select"] = select.index
+            return Response(data, status=status.HTTP_200_OK)
         # 복습노트의 독해문제 리스트
         else:
             user = request.user
             quizzes = user.reading_quizzes.all()
             serializer = ReadingQuizListSerializer(quizzes, many=True)
-            if serializer.is_valid():
+            try:
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
+            except:
                 return Response(
                     serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
@@ -100,15 +125,15 @@ class ReadingBookView(APIView):
     def post(self, request, quiz_id):
         # 복습노트에 저장
         select = request.data.get("select")
+
         user = request.user
         quiz = get_object_or_404(ReadingQuiz, pk=quiz_id)
+
         if quiz not in user.reading_quizzes.all():
-            user.reading_quizzes.add(quiz, through_defaults={"select": select})
-            return Response({"message": "저장 완료"}, status=status.HTTP_200_OK)
+            user.reading_quizzes.add(quiz, through_defaults={"index": select})
+            return Response({"detail": "저장 완료"}, status=status.HTTP_200_OK)
         else:
-            return Response(
-                {"message": "이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "이미 존재합니다."}, status=status.HTTP_400_BAD_REQUEST)
 
     # 복습노트에서 제거
     def delete(self, request, quiz_id):
@@ -121,6 +146,8 @@ class ReadingBookView(APIView):
 
 
 class WordView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     # 단어 퀴즈 보기
     def get(self, request):
         try:
@@ -141,7 +168,7 @@ class WordView(APIView):
                 ]
 
                 quiz = {
-                    "id":correct_word.id,
+                    "id": correct_word.id,
                     "term": correct_word.term,
                     "meaning": correct_word.meaning,
                     "wrong": [word.meaning for word in wrong_words],
@@ -156,7 +183,13 @@ class WordView(APIView):
             )
 
     # DB에 단어 추가
-    def post(self, request):
+    def post(self, request, word_id=None):
+        # 푼 단어 카운트
+        if word_id:
+            user = request.user
+            user.word_nums += 1
+            user.save()
+            return Response(status=status.HTTP_200_OK)
         term = request.data["term"]
         try:
             word = Word.object.get(term=term)
@@ -175,6 +208,8 @@ class WordView(APIView):
 
 
 class WordsBookView(APIView):
+    permission_classes = [IsAuthenticated]
+
     # 내 단어장 보기
     def get(self, request):
         user = request.user
@@ -211,25 +246,3 @@ class WordsBookView(APIView):
             words.remove(word)
             return Response({"message": "제거되었습니다."}, status=status.HTTP_200_OK)
         return Response({"message": "단어가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# class DialogueView(APIView):
-#     def post(self, request):
-#         scenario_id = request.data["scenarioId"]
-#         scenario = get_object_or_404(Scenario, scenario_id)
-#         content = f"""
-#             Write a single dialogue between a(an) {scenario.you} and {scenario.me} who {scenario.action}.
-#             You are a(an) {scenario.you} and I am a(an) {scenario.me}.
-#             Please write a short one dialogue containing 5 conversations.
-#             Please write a dialogue using A2 level words.
-#         """
-#         response = openai.ChatCompletion.create(
-#             model="gpt-3.5-turbo",
-#             provider=openai.Provider.GptGo,
-#             messages=[
-#                 {"role": "system", "content": content},
-#             ],
-#             stream=True,
-#         )
-#         for message in response:
-#             print(message)
