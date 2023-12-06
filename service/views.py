@@ -89,11 +89,16 @@ class QnaView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             qna = get_object_or_404(Qna.objects.select_related("author"), pk=qna_id)
-            if hasattr(request.user, "is_admin"):
+            user = request.user
+            if qna.is_private != True:
                 pass
-            elif qna.is_private == True and request.user != qna.author:
+            elif not user.is_authenticated:
                 return Response(
-                    {"message": "권한이없습니다"}, status=status.HTTP_403_FORBIDDEN
+                    {"message": "권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN
+                )
+            elif not (user.is_staff or user == qna.author):
+                return Response(
+                    {"message": "권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN
                 )
             serializer = QnaSerializer(qna)
             return Response(serializer.data, status=status.HTTP_200_OK)
