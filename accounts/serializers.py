@@ -35,6 +35,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "rankers",
             "my_rank",
             "coin",
+            "is_admin",
         )
 
     # 독해 문제 푼 수와 단어 푼 수를 더하여 순위 점수를 계산
@@ -45,18 +46,19 @@ class ProfileSerializer(serializers.ModelSerializer):
     # 상위 10명의 사용자를 가져와서 닉네임을 리스트로 변환
     def get_rankers(self, obj):
         top_10_rankers = User.objects.annotate(
-            score=F('reading_nums') + F('word_nums')
-        ).order_by('-score')[:10]
+            score=F("reading_nums") + F("word_nums")
+        ).order_by("-score")[:10]
         return [user.nickname for user in top_10_rankers]
-    
+
     def get_my_rank(self, obj):
         top_10_rankers = User.objects.annotate(
-            score=F('reading_nums') + F('word_nums')
-        ).order_by('-score')
-        my_rank = list(top_10_rankers.values_list(F('email'), flat=True)).index(obj.email) + 1
-        
-        return my_rank
+            score=F("reading_nums") + F("word_nums")
+        ).order_by("-score")
+        my_rank = (
+            list(top_10_rankers.values_list(F("email"), flat=True)).index(obj.email) + 1
+        )
 
+        return my_rank
 
 
 class CustomRegisterSerializer(RegisterSerializer):
