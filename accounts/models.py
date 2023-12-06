@@ -45,8 +45,8 @@ class User(AbstractBaseUser):
     password = models.CharField("비밀번호", max_length=255)
     email = models.EmailField(unique=True)
     profile_img = models.ImageField(
-        upload_to="media/userProfile",
-        default="media/userProfile/default.png",
+        upload_to="/media/userProfile",
+        default="/media/userProfile/default.png",
         blank=True,
         null=True,
     )
