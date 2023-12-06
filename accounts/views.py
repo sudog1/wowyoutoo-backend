@@ -278,6 +278,7 @@ class KakaoLogin(APIView):
                         "refresh": str(refresh),
                         "access": str(refresh.access_token),
                         "provider": social_user.provider,
+                        "is_admin": user.is_admin,
                         "msg": "로그인 성공",
                     },
                     status=status.HTTP_200_OK,
@@ -305,6 +306,7 @@ class KakaoLogin(APIView):
                 {
                     "refresh": str(refresh),
                     "access": str(refresh.access_token),
+                    "is_admin": user.is_admin,
                     "msg": "회원가입 성공",
                 },
                 status=status.HTTP_201_CREATED,
@@ -388,6 +390,7 @@ class GithubLogin(APIView):
                         "refresh": str(refresh),
                         "access": str(refresh.access_token),
                         "provider": social_user.provider,
+                        "is_admin": user.is_admin,
                         "msg": "로그인 성공",
                     },
                     status=status.HTTP_200_OK,
@@ -411,6 +414,7 @@ class GithubLogin(APIView):
                 {
                     "refresh": str(refresh),
                     "access": str(refresh.access_token),
+                    "is_admin": user.is_admin,
                     "msg": "회원가입 성공",
                 },
                 status=status.HTTP_201_CREATED,
