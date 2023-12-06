@@ -11,11 +11,11 @@ from django.conf import settings
 def send_email(email_list, data):
     context = {
         "content": data["content"],
-        "image_url": "api.wowyoutoo.me/{}".format(data["image"]),  # 배포시 도메인이름으로
+        "image_url": "{}/{}".format(settings.DOMAIN, data["image"]),  # 배포시 도메인이름으로
     }
 
     html_mail = render_to_string("email.html", context)
-    email = EmailMessage(
+    email = EmailMultiAlternatives(
         data["title"],
         html_mail,
         to=email_list,
