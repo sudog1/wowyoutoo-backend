@@ -63,7 +63,7 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
         messages.append(
             {
                 "role": user_res["role"],
-                "content": sync_to_async(
+                "content": await sync_to_async(
                     translator.translate_text(user_res["content"], target_lang="en")
                 ),
             }
