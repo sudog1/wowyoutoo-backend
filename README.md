@@ -177,7 +177,7 @@ requirements.txt 안의 라이브러리를 설치해주세요
 
 ### Installation
 
-API 키와 url 을 .env 파일에 담아주세요
+API 키와 url 을 .env 파일에 담아주세요
 
 1. 카카오 개발자 홈페이지에서 회원가입을 통해 API key 를 받아주세요 [https://developers.kakao.com/](https://developers.kakao.com/) github 는 settings 에서 발급받을 수 있습니다. 
 [https://github.com/settings/developers](https://github.com/settings/developers) 에서 앱을 등록하고 키를 발급받아 주세요. 
