@@ -97,42 +97,31 @@
     - gpt api 를 이용해 chat gpt 와 실시간 영어 채팅이 가능합니다.
     
 - **영어 단어 문제**
-    ![단어시험](
-https://github.com/sudog1/wowyoutoo-backend/assets/89892255/01cbfd18-9d67-48e4-b1b2-4fed3ad1f472
-)
+    ![단어시험](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/01cbfd18-9d67-48e4-b1b2-4fed3ad1f472)
     
     - 단어 데이터베이스에서 무작위로 10개를 가져와 단어 시험을 볼 수 있습니다.
     - 단어 데이터베이스는 총 1000개의 단어로 이루어져 있으며, 실용성 중심으로 배포된 파일을 이용하고 있습니다.
     - 틀렸거나, 맞았어도 잘 모르는 단어는 save 버튼을 통해 저장할 수 있습니다.
     
 - **독해 지문 / 문제 생성 및 저장 기능**
-    ![독해시험](
-https://github.com/sudog1/wowyoutoo-backend/assets/89892255/a7fc5e3e-b17b-4f40-afaa-fb32591ef113
-)
+    ![독해시험](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/a7fc5e3e-b17b-4f40-afaa-fb32591ef113)
     
     - 로그인을 하지 않은 유저도 기존에 저장된 독해 지문에서 문제를 가져오는 기존 독해 지문 풀기가 가능합니다.
     - 로그인을 한 유저는 gpt 가 새롭게 생성해주는 지문을 일정 코인을 낸 뒤 풀고 저장할 수 있습니다.
     - 저장한 지문은 마이페이지에서 확인 가능하며, 내가 선택한 답과 정답을 보여줍니다.
     
 - **영어 뉴스 제공 기능**
-    ![뉴스페이지](
-https://github.com/sudog1/wowyoutoo-backend/assets/89892255/e990a73c-f9a3-4bf6-826c-a40adbe8ac5b
-)
+    ![뉴스페이지](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/e990a73c-f9a3-4bf6-826c-a40adbe8ac5b)
     
     - NewYorkTimes api 를 이용해 만든 뉴스페이지 입니다. 기사의 내용을 대략적으로 볼 수 있고, 원한다면 클릭하여 해당 기사 링크로 이동할 수 있습니다.
     
 - **마이페이지**
-   ![마이페이지](
-https://github.com/sudog1/wowyoutoo-backend/assets/89892255/7c1d0f99-0672-4441-a3e3-a1a80eed2ac4
-)
-![마이페이지_기능](
-https://github.com/sudog1/wowyoutoo-backend/assets/89892255/50db2c90-a166-4f7c-83ec-5755a4e6)
+   ![마이페이지](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/7c1d0f99-0672-4441-a3e3-a1a80eed2ac4)
+   ![마이페이지_기능](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/50db2c90-a166-4f7c-83ec-5755a4e6)
     
 - **결제 기능**
     
-  ![결제페이지](
-https://github.com/sudog1/wowyoutoo-backend/assets/89892255/f22d1c40-493a-4e70-a037-a921dbebccb5
-)
+  ![결제페이지](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/f22d1c40-493a-4e70-a037-a921dbebccb5)
 
 
 
