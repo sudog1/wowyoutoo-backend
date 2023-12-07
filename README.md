@@ -88,7 +88,7 @@
 ### Built With
 
 * <img src="https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white&link=https%3A%2F%2Fwww.python.org%2F"> 
-* <img alt="Static Badge" src="https://img.shields.io/badge/redis?style=flat-square&logo=redis&logoColor=white&label=https%3A%2F%2Fredis.io%2F&labelColor=white&color=red&link=https%3A%2F%2Fredis.io%2F">
+* <img src="https://img.shields.io/badge/redis?style=flat-square&logo=redis&logoColor=white&label=https%3A%2F%2Fredis.io%2F&labelColor=white&color=red&link=https%3A%2F%2Fredis.io%2F">
 * [![Bootstrap][Bootstrap.com]][Bootstrap-url]
 * [![JQuery][JQuery.com]][JQuery-url]
 
