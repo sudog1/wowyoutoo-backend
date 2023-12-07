@@ -121,6 +121,10 @@
 - **마이페이지**
   
    ![마이페이지](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/7c1d0f99-0672-4441-a3e3-a1a80eed2ac4)
+   ![마이페이지_기능](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/9a7924a8-fb72-4677-9c40-cccdc786946a)
+
+  - 내 정보 수정 및 나의 정보를 열람할 수 있습니다.
+  - 관리자라면 mypage 에서 백오피스로 들어갈 수 있습니다.
    
     
 - **결제 기능**
@@ -128,6 +132,11 @@
   ![결제페이지](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/f22d1c40-493a-4e70-a037-a921dbebccb5)
 
   - PortOne 을 통해 구현한 결제페이지입니다. 다양한 수단으로 결제할 수 있습니다.
+ 
+
+- **백오피스**
+  - 단체 이메일 보내기 / 공지사항 쓰기 / FAQ 답변하기 를 할 수 있습니다.
+  - is_admin 이 true 일 시 마이페이지의 '백오피스' 버튼을 통해 들어올 수 있습니다.
 
 
 
