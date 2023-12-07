@@ -23,7 +23,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/sudog1/wowyoutoo-backend.git">
   <img src="https://github.com/sudog1/wowyoutoo-backend/issues/69#issue-2030045393" alt="Logo" width="80" height="80">
   </a>
 
