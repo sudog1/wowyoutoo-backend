@@ -235,8 +235,6 @@ Project Link: [https://github.com/sudog1/wowyoutoo-backend.git](https://github.c
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
 * [Celery를 활용한 비동기 분산 작업](https://www.notion.so/Celery-aa7b0607d381467aa5b3034161ac718e)
 * [OAuth 구현](https://www.notion.so/OAuth-097483a7f83c42b78cbf34d9a3c21859)
 * [Channels를 활용한 웹 소켓 구현](https://www.notion.so/Channels-a2a80848fe94494180c884f404fe8899)
