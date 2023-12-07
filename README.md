@@ -84,7 +84,7 @@
 
 - **회원 가입 / 로그인 / 소셜 로그인**
     
-    ![스크린샷 2023-12-04 오후 12.00.31.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/83c75a39-3aba-4ba4-a792-7aefe4b07895/20a3ea42-78e6-40a1-858b-5d665bccd2e8/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-12-04_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_12.00.31.png)
+    ![로그인](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/4a2fc70f-6286-4520-bde9-7658f9e1fc11)
     
     - 일반 회원가입은 이메일 인증을 통해 회원가입이 가능합니다.
     - 카카오와 깃허브 계정으로도 로그인이 가능합니다. 다만 이 경우에는 프로필 수정을 할 수 없습니다.
@@ -92,42 +92,47 @@
     
 - **AI 채팅 기능**
     
-    ![스크린샷 2023-12-04 오전 11.52.24.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/83c75a39-3aba-4ba4-a792-7aefe4b07895/82bd6e59-2119-4ec2-9aff-1a44563e11b4/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-12-04_%E1%84%8B%E1%85%A9%E1%84%8C%E1%85%A5%E1%86%AB_11.52.24.png)
+   ![AI채팅](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/8b7faee1-1001-4c44-85b4-dff4d90bc805)
     
     - gpt api 를 이용해 chat gpt 와 실시간 영어 채팅이 가능합니다.
     
 - **영어 단어 문제**
-    
-    
-    ![스크린샷 2023-12-04 오전 11.46.57.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/83c75a39-3aba-4ba4-a792-7aefe4b07895/9c584cf2-369b-435e-b716-3e5419befece/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-12-04_%E1%84%8B%E1%85%A9%E1%84%8C%E1%85%A5%E1%86%AB_11.46.57.png)
+    ![단어시험](
+https://github.com/sudog1/wowyoutoo-backend/assets/89892255/01cbfd18-9d67-48e4-b1b2-4fed3ad1f472
+)
     
     - 단어 데이터베이스에서 무작위로 10개를 가져와 단어 시험을 볼 수 있습니다.
     - 단어 데이터베이스는 총 1000개의 단어로 이루어져 있으며, 실용성 중심으로 배포된 파일을 이용하고 있습니다.
     - 틀렸거나, 맞았어도 잘 모르는 단어는 save 버튼을 통해 저장할 수 있습니다.
     
 - **독해 지문 / 문제 생성 및 저장 기능**
-    
-    ![스크린샷 2023-12-04 오후 12.06.48.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/83c75a39-3aba-4ba4-a792-7aefe4b07895/ea39f87f-2249-4f89-b009-bf7bf3872c0c/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-12-04_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_12.06.48.png)
+    ![독해시험](
+https://github.com/sudog1/wowyoutoo-backend/assets/89892255/a7fc5e3e-b17b-4f40-afaa-fb32591ef113
+)
     
     - 로그인을 하지 않은 유저도 기존에 저장된 독해 지문에서 문제를 가져오는 기존 독해 지문 풀기가 가능합니다.
     - 로그인을 한 유저는 gpt 가 새롭게 생성해주는 지문을 일정 코인을 낸 뒤 풀고 저장할 수 있습니다.
     - 저장한 지문은 마이페이지에서 확인 가능하며, 내가 선택한 답과 정답을 보여줍니다.
     
 - **영어 뉴스 제공 기능**
-    
-    ![스크린샷 2023-12-04 오후 12.18.45.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/83c75a39-3aba-4ba4-a792-7aefe4b07895/fb50f896-e68e-4451-b6f6-68ed080c029a/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-12-04_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_12.18.45.png)
+    ![뉴스페이지](
+https://github.com/sudog1/wowyoutoo-backend/assets/89892255/e990a73c-f9a3-4bf6-826c-a40adbe8ac5b
+)
     
     - NewYorkTimes api 를 이용해 만든 뉴스페이지 입니다. 기사의 내용을 대략적으로 볼 수 있고, 원한다면 클릭하여 해당 기사 링크로 이동할 수 있습니다.
     
 - **마이페이지**
-    
-    ![스크린샷 2023-12-04 오전 10.46.20.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/83c75a39-3aba-4ba4-a792-7aefe4b07895/ecc25a30-8726-4515-89a1-7e0edad5717c/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-12-04_%E1%84%8B%E1%85%A9%E1%84%8C%E1%85%A5%E1%86%AB_10.46.20.png)
-    
-    ![스크린샷 2023-12-04 오전 11.20.27.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/83c75a39-3aba-4ba4-a792-7aefe4b07895/9e208c3d-d3e8-4fba-ba0f-e8b73b2601a8/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-12-04_%E1%84%8B%E1%85%A9%E1%84%8C%E1%85%A5%E1%86%AB_11.20.27.png)
+   ![마이페이지](
+https://github.com/sudog1/wowyoutoo-backend/assets/89892255/7c1d0f99-0672-4441-a3e3-a1a80eed2ac4
+)
+![마이페이지_기능](
+https://github.com/sudog1/wowyoutoo-backend/assets/89892255/50db2c90-a166-4f7c-83ec-5755a4e6)
     
 - **결제 기능**
     
-    ![스크린샷 2023-12-04 오전 11.33.22.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/83c75a39-3aba-4ba4-a792-7aefe4b07895/ec720864-fb15-4d95-9c00-6578110f48c1/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-12-04_%E1%84%8B%E1%85%A9%E1%84%8C%E1%85%A5%E1%86%AB_11.33.22.png)
+  ![결제페이지](
+https://github.com/sudog1/wowyoutoo-backend/assets/89892255/f22d1c40-493a-4e70-a037-a921dbebccb5
+)
 
 
 
