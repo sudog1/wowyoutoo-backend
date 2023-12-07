@@ -24,8 +24,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
-  ![와너도11111](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/04f877e1-0d37-49d8-9653-a0fc0aa55362)
-
+  <img src="https://github.com/sudog1/wowyoutoo-backend/issues/69#issue-2030045393" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Wow!YouToo?</h3>
