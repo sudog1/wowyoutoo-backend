@@ -208,7 +208,7 @@ Use this space to list resources you find helpful and would like to give credit 
 [Python-url]: https://www.python.org/
 [VanillaJS.com]:  https://img.shields.io/badge/Javascript-grey?style=for-the-badge&logo=javascript
 [VanillaJS-url]: http://vanilla-js.com/
-[Django.com]: https://img.shields.io/badge/django?style=for-the-badge&logo=django&logoColor=white
+[Django.com]: https://img.shields.io/badge/django-092E20?style=for-the-badge&logo=django&logoColor=white
 [Django-url]: https://www.djangoproject.com/
 [Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
 [Bootstrap-url]: https://getbootstrap.com
