@@ -69,7 +69,8 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://wowyoutoo.me/main.html)
+[![와너두](https://github.com/sudog1/wowyoutoo-backend/assets/89892255/2385e51e-ef2b-4c42-8c1e-b0537304fed8)
+](https://wowyoutoo.me/main.html)
 
 스픽, 산타토익 등 AI 를 이용한 언어학습이 상업적인 아이디어로 주목받고 있는 가운데, 저희는 이러한 사이트 중 '가볍게' 영어공부를 할 수 있는 사이트는 찾아볼 수 없다고 생각했습니다. 바쁜 현대 사회에서 길게 시간을 내어 영어공부를 하기란 큰 결심이 필요한 일이죠. 바로 그러한 이유로, 와!너두? 가 출시되었습니다.
 
