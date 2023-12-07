@@ -1,66 +1,214 @@
-# 설치한 패키지
-- django 
-- djangorestframework 
-- djangorestframework-jwt 
-- django-cors-headers
+<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+<a name="readme-top"></a>
+<!--
+*** Thanks for checking out the Best-README-Template. If you have a suggestion
+*** that would make this better, please fork the repo and create a pull request
+*** or simply open an issue with the tag "enhancement".
+*** Don't forget to give the project a star!
+*** Thanks again! Now go create something AMAZING! :D
+-->
 
-# 브랜치 전략
-### main
 
-에러 발생시 hotfix로 분기
 
-### hotfix
+<!-- PROJECT SHIELDS -->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
 
-오류 해결시 main, devlop병합
 
-### release
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/othneildrew/Best-README-Template">
+    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  </a>
 
-테스트 후 문제가 없으면 main, develop로 병합
+  <h3 align="center">Wow!YouToo?</h3>
 
-### develop
+  <p align="center">
+    당신을 위한 AI 영어 선생님
+    <br />
+    <a href="https://github.com/sudog1/wowyoutoo-backend#readme"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+  </p>
+</div>
 
-기능개발시 feature/<기능> 브랜치로 분기
-목표지점까지 개발 완료시 release 브랜치로 분기
 
-### feature/
 
-기능 별 브랜치 생성(ex. feature/login)
-기능 개발 완료 시 develop에 병합
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
 
-# 커밋 컨벤션
 
-### `<type>(<scope>): <message>`
 
-### type(필수)
-- feat: 새로운 기능 추가
-- fix: 버그 수정 또는 typo
-- refactor: 리팩토링
-- design: CSS 등 사용자 UI 디자인 변경
-- comment: 필요한 주석 추가 및 변경
-- style: 코드 포맷팅, 세미콜론 누락, 코드 변경이 없는 경우
-- docs: 문서 수정
-- test: 테스트(테스트 코드 추가, 수정, 삭제, 비즈니스 로직에 변경이 없는 경우)
-- chore: 위에 걸리지 않는 기타 변경사항(빌드 스크립트 수정, assets image, 패키지 매니저 등)
-- init: 프로젝트 초기 생성
-- rename: 파일 혹은 폴더명 수정하거나 옮기는 경우
-- remove: 파일을 삭제하는 작업만 수행하는 경우
+<!-- ABOUT THE PROJECT -->
+## About The Project
 
-### scope(옵션)
-커밋이 영향을 주는 코드의 특정 부분이나 구성 요소
+[![Product Name Screen Shot][product-screenshot]](https://wowyoutoo.me/main.html)
 
-- auth: 인증 관련
+스픽, 산타토익 등 AI 를 이용한 언어학습이 상업적인 아이디어로 주목받고 있는 가운데, 저희는 이러한 사이트 중 '가볍게' 영어공부를 할 수 있는 사이트는 찾아볼 수 없다고 생각했습니다. 바쁜 현대 사회에서 길게 시간을 내어 영어공부를 하기란 큰 결심이 필요한 일이죠. 바로 그러한 이유로, 와!너두? 가 출시되었습니다.
 
-### message(필수)
-짧고 간결하게 구현한 기능을 설명해 주세요.
-- 예시: "로그인 인증 구현"
-- 잘못된 예시: "유저의 로그인 인증을 구현하였습니다"
+## 와!너두? 는 이런 분들을 위해 만들어졌습니다.
 
-### 커밋 메시지 예시
-- feat(auth): 구글 로그인 추가
-- fix(validation): 유저 로그인 데이터 검증
-- docs(readme): 그라운드룰 추가
-- test(articles): 작성글 조회 테스트
+* 틈틈히 영어공부를 하고 싶었지만 진짜 사람과 대화하기는 부담스러웠던 분들
+* 긴 시간을 영어 공부에 할애하기 어려운 분들
+* 기초적인 어휘부터 어려운 독해까지 한 번에 경험해보고 싶은 분들
 
-# git hooks
-### pre-commit
-- black
+
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+### Built With
+
+* ![Static Badge](https://img.shields.io/badge/:badgeContent?style=flat-square&logo=redis&logoColor=white&label=https%3A%2F%2Fredis.io%2F&labelColor=white&color=red&link=https%3A%2F%2Fredis.io%2F)
+* [![PortOne][\https://portone.gitbook.io/docs/undefined/readme]][PortOne-url]
+* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
+* [![JQuery][JQuery.com]][JQuery-url]
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+크롬 브라우저 사용을 권장합니다.
+
+### Prerequisites
+
+requirements.txt 안의 라이브러리를 설치해주세요
+* pip
+  ```sh
+  pip install -r requirements.txt
+  ```
+
+### Installation
+
+API 키와 url 을 .env 파일에 담아주세요
+
+1. 카카오 개발자 홈페이지에서 회원가입을 통해 API key 를 받아주세요 [https://developers.kakao.com/](https://developers.kakao.com/) github 는 settings 에서 발급받을 수 있습니다. 
+[https://github.com/settings/developers](https://github.com/settings/developers) 에서 앱을 등록하고 키를 발급받아 주세요. 
+OpenAI[https://platform.openai.com/account/api-keys](https://platform.openai.com/account/api-keys) 에서 회원가입을 한 뒤 api key 를 발급받아 주세요.
+PortOne[https://portone.io/korea/ko](https://portone.io/korea/ko) 에서 회원가입을 한 뒤 시스템 설정 > 내정보의 API key, API secret을 설정하시고 "Get Token" 버튼을 통해 토큰을 발급받아 주세요.
+
+2. 리포지토리를 clone 받아주세요
+   ```sh
+   https://github.com/sudog1/wowyoutoo-backend.git
+   ```
+3. requirements.txt 를 다운받아 주세요
+   ```sh
+   pip install -r requirements.txt
+   ```
+4. 루트 디렉도리에 .env 를 생성한 뒤 아래의 형식으로 담아주세요
+   ```sh
+   DEBUG=True
+    SECRET_KEY="YOUR_SECRET_KEY"
+    KAKAO_REST_API_KEY="YOUR_KAKAO_API_KEY"
+    SOCIAL_AUTH_GITHUB_CLIENT_ID="YOUR_GITHUB_CLIENT_ID"
+    SOCIAL_AUTH_GITHUB_SECRET="YOUR_GITHUB_SECRET_KEY"
+    OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
+    IMP_KEY="YOUR_PORTONE_KEY"
+    IMP_SECRET="YOUR_PORTONE_SECRET_KEY"
+   ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- CONTRIBUTING -->
+## Contributing
+
+저희 프로젝트에 개선할 점이 보이신다면 아래의 과정을 따라주세요!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- CONTACT -->
+## Contact
+
+스파게티코드클럽 - [https://www.notion.so/b025be898ca042ef9a41a8b2b5ee2660](https://www.notion.so/b025be898ca042ef9a41a8b2b5ee2660) - notion
+
+Project Link: [https://github.com/sudog1/wowyoutoo-backend.git](https://github.com/sudog1/wowyoutoo-backend.git)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- ACKNOWLEDGMENTS -->
+## Acknowledgments
+
+Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+
+* [Celery를 활용한 비동기 분산 작업](https://www.notion.so/Celery-aa7b0607d381467aa5b3034161ac718e)
+* [OAuth 구현](https://www.notion.so/OAuth-097483a7f83c42b78cbf34d9a3c21859)
+* [Channels를 활용한 웹 소켓 구현](https://www.notion.so/Channels-a2a80848fe94494180c884f404fe8899)
+* [PortOne api를 활용한 결제 시스템](https://www.notion.so/PortOne-api-af97108e76184d63abb757a2e93db3a9)
+* [Docker를 사용한 배포](https://www.notion.so/Docker-6d1f8d20a0484bdfac1a145de873aad4)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
+[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
+[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
+[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
+[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
+[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
+[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
+[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
+[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/othneildrew
+[product-screenshot]: images/screenshot.png
+[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
+[Next-url]: https://nextjs.org/
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
+[Vue-url]: https://vuejs.org/
+[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
+[Angular-url]: https://angular.io/
+[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
+[Svelte-url]: https://svelte.dev/
+[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
+[Laravel-url]: https://laravel.com
+[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
+[Bootstrap-url]: https://getbootstrap.com
+[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
+[JQuery-url]: https://jquery.com 
