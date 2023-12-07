@@ -58,6 +58,7 @@
       </ul>
     </li>
     <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#usage">Usage</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
@@ -80,7 +81,7 @@
 * 기초적인 어휘부터 어려운 독해까지 한 번에 경험해보고 싶은 분들
 
 
-## 주요 기능
+## Usage
 
 - **회원 가입 / 로그인 / 소셜 로그인**
     
