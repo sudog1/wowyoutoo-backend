@@ -24,7 +24,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/sudog1/wowyoutoo-backend.git">
-  <img src="https://github.com/sudog1/wowyoutoo-backend/issues/69#issue-2030045393" alt="Logo" width="80" height="80">
+  <img src="https://private-user-images.githubusercontent.com/89892255/288664012-04f877e1-0d37-49d8-9653-a0fc0aa55362.jpg?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTEiLCJleHAiOjE3MDE5MzMyODEsIm5iZiI6MTcwMTkzMjk4MSwicGF0aCI6Ii84OTg5MjI1NS8yODg2NjQwMTItMDRmODc3ZTEtMGQzNy00OWQ4LTk2NTMtYTBmYzBhYTU1MzYyLmpwZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFJV05KWUFYNENTVkVINTNBJTJGMjAyMzEyMDclMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjMxMjA3VDA3MDk0MVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTBmMGEwZTBlYjg5NjBlNTM5MGI3NzE3OWQwMzhjY2I1MWM0NGM2ODVhMmRkNjFmYjZhMWFlMzgzNTdhMjQyZDQmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.BvAgekU5-LDOwFvG8isBRvTgwOdq4sFD7ehxcIErvLE" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Wow!YouToo?</h3>
