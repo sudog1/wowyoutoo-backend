@@ -94,7 +94,6 @@
 * [![Celery][Celery.com]][Celery-url]
 * [![Redis][Redis.com]][Redis-url]
 * [![OpenAI][OpenAI.com]][OpenAI-url]
-* [![PortOne][PortOne.com]][PortOne-url]
 * [![Docker][Docker.com]][Docker-url]
 * [![AmazonAWS][AmazonAWS.com]][AmazonAWS-url]
 * [![Bootstrap][Bootstrap.com]][Bootstrap-url]
